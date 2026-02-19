@@ -7,20 +7,16 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.util.math.Vec3d;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import you.jass.betterhitreg.hitreg.Hit;
 import you.jass.betterhitreg.hitreg.Hitreg;
-import you.jass.betterhitreg.settings.Settings;
-import you.jass.betterhitreg.settings.Toggle;
-import you.jass.betterhitreg.util.MultiVersion;
-import you.jass.betterhitreg.util.Scheduler;
+import you.jass.betterhitreg.utility.MultiVersion;
 
 import static you.jass.betterhitreg.hitreg.Hitreg.*;
-import static you.jass.betterhitreg.util.MultiVersion.message;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class AttackMixin {
@@ -28,47 +24,19 @@ public abstract class AttackMixin {
     private static void attack(PlayerEntity player, Entity target, CallbackInfo ci) {
         if (client.player == null || !(target instanceof LivingEntity) || target instanceof ArmorStandEntity || !target.isAlive() || target.isInvulnerable()) return;
         Hitreg.target = (LivingEntity) target;
-        lastAttackLocation = client.player.getPos();
 
-        //hitting before 500ms is too fast to deal damage, lower it by 25 because it's not exact and can be lower
-        boolean hitEarly = System.currentTimeMillis() - lastAttack < 475;
-        boolean hittingNewTarget = lastTarget != target.getId();
-        boolean didSprintReset = sprintWasReset;
-        boolean targetHasShield = Hitreg.target.isHolding(Items.SHIELD);
+        //hitting before 500ms is too fast to deal damage, lower it by half a tick (25ms) because it's not exact and can be lower
+        long sinceLastHit = System.currentTimeMillis() - lastAttack;
+        boolean hitEarly = sinceLastHit < 475;
 
-        //make new targets take damage even if the hit was early
-        if (!hitEarly || hittingNewTarget) {
-            //if the most recent target animation that we received was more recent than the last attack we did
-            boolean lastAttackWasAnimated = lastAnimation > lastAttack;
-
-            //account for swapping to a new target which could give the previous target not enough time to take damage
-            if (lastAttackWasAnimated || hittingNewTarget) wasGhosted = false;
-            else {
-                //don't count it if the hit was the first hit on a new target as some players may be invincible
-                //also don't count it if the previous hit was ghosted or if they have a shield, since they may be invincible
-                if (!wasGhosted && !newTarget && !targetHasShield) {
-                    if (Toggle.ALERT_GHOSTS.toggled()) client.execute(() -> message("hit §7was §cghosted", "/hitreg alertGhosts"));
-                    last100Regs.addGhost();
-                }
-
-                //this tells the current hit that the previous hit was ghosted
-                wasGhosted = true;
-            }
-
-            lastAttack = System.currentTimeMillis();
-            newTarget = hittingNewTarget;
-            lastTarget = target.getId();
-            hasShield = targetHasShield;
-            sprintWasReset = false;
-            alreadyAnimated = false;
-        }
-
-        if (!Hitreg.isToggled() || !withinFight() || !bothAlive()) return;
-
+        //load the hit, this is where our custom hit animation & sound prepares to play
         Hit hit = new Hit();
         hit.target = Hitreg.target;
+        hit.cooldown = client.player.getAttackCooldownProgress(0.5f);
         hit.tooEarlyForDamage = hitEarly;
-        hit.tooEarlyForSpecial = client.player.getAttackCooldownProgress(0.5f) <= 0.9f;
+        hit.tooEarlyForSpecial = hit.cooldown <= 0.9f;
+        hit.hadShield = targetHasShield;
+        hit.wasBlocked = targetIsBlocking;
         hit.wasSprinting = client.player.isSprinting();
         hit.wasFalling = client.player.getVelocity().getY() < -0.08;
         hit.wasOnGround = client.player.isOnGround();
@@ -78,7 +46,26 @@ public abstract class AttackMixin {
         hit.wasBlind = client.player.hasStatusEffect(StatusEffects.BLINDNESS);
         hit.wasHoldingSword = client.player.getMainHandStack().getItem().getName().getString().toLowerCase().contains("sword");
         hit.swordHadSharpness = MultiVersion.hasSharpness();
-        hit.sprintWasReset = didSprintReset;
-        Scheduler.schedule(Settings.getHitreg(), hit::run);
+        hit.sprintWasReset = sprintIsReset;
+        hit.wasNewTarget = lastTarget != target.getId();
+        hit.wasHitByAnother = target.timeUntilRegen > 10 && sinceLastHit >= 1000;
+
+        if (!hitEarly) {
+            if (!fighting) fightStartedAt = System.currentTimeMillis();
+            fighting = true;
+            hitByAnother = hit.wasHitByAnother;
+            newTarget = hit.wasNewTarget;
+            targetHasShield = Hitreg.target.isHolding(Items.SHIELD);
+            targetIsBlocking = targetHasShield && Hitreg.target.isUsingItem();
+            lastAttackLocation = MultiVersion.getBasePosition(client.player);
+            lastAttack = System.currentTimeMillis();
+            lastTarget = target.getId();
+            sprintIsReset = false;
+            alreadyAnimated = false;
+            alreadyKnockedBack = false;
+            updateFightState();
+        }
+
+        hit.load();
     }
 }

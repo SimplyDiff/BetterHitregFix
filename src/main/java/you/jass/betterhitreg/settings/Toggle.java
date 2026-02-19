@@ -1,11 +1,15 @@
 package you.jass.betterhitreg.settings;
 
-import you.jass.betterhitreg.util.MultiVersion;
+import you.jass.betterhitreg.utility.MultiVersion;
 
 public enum Toggle {
     TOGGLE("toggle", "custom hitreg", true),
+    SAFE_REGS_ONLY("safeRegsOnly", "safe regs only", true),
+    IGNORE_SHIELD_HOLDERS("ignoreShieldHolders", "ignore shield holders", false),
     ALERT_DELAYS("alertDelays", "alert delays", false),
     ALERT_GHOSTS("alertGhosts", "alert ghosts", false),
+    ALERT_INCONSISTENCIES("alertInconsistencies", "alert inconsistencies", false),
+    ALERT_FIGHTS("alertFights", "alert fights", false),
     LEGACY_SOUNDS("legacySounds", "1.8 sounds", false),
     HIDE_ANIMATIONS("hideAnimations", "hide animations", false),
     HIDE_ARMOR("hideArmor", "hide armor", false),
@@ -17,10 +21,9 @@ public enum Toggle {
     SILENCE_THEM("silenceThem", "silence their hits", false),
     SILENCE_NON_HITS("silenceNonHits", "silence non-hits", false),
     HIDE_OTHER_FIGHTS("hideOtherFights", "hide other fights", false),
-    MUFFLED_HITSOUNDS("muffledHitsounds", "muffled hitsounds", false),
     RENDER_HITBOX("renderHitbox", "render target hitbox", false),
     RENDER_CROSS("renderCross", "render target cross", false),
-    SAFE_REGS_ONLY("safeRegsOnly", "safe regs only", true);
+    RENDER_RING("renderRing", "render reach ring", false);
 
     private final String key;
     private final String label;
@@ -53,8 +56,9 @@ public enum Toggle {
         String command = "/hitreg " + key;
         MultiVersion.message(label + " §7is now " + (value ? "§aon§7" : "§coff§7"), command);
 
-        if (this == SAFE_REGS_ONLY) {
-            MultiVersion.message("§7first hits & shields " + (value ? "will no longer" : "will now") + " use custom hitreg", command);
+        switch (this) {
+            case SAFE_REGS_ONLY -> MultiVersion.message("§7first hits " + (value ? "will no longer" : "will now") + " use custom hitreg", command);
+            case IGNORE_SHIELD_HOLDERS -> MultiVersion.message("§7players with a shield (blocking or not) " + (value ? "will no longer" : "will now") + " be affected by custom hitreg", command);
         }
 
         return value;

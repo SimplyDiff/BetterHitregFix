@@ -1,6 +1,4 @@
-package you.jass.betterhitreg.util;
-
-import net.minecraft.client.MinecraftClient;
+package you.jass.betterhitreg.utility;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,6 +8,11 @@ import static you.jass.betterhitreg.hitreg.Hitreg.client;
 
 public class Scheduler {
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+
+    public static void schedule(Runnable task) {
+        if (client == null) return;
+        client.execute(task);
+    }
 
     public static void schedule(long delay, Runnable task) {
         if (client == null) return;

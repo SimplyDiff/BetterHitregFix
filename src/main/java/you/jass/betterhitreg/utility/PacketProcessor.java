@@ -1,0 +1,166 @@
+package you.jass.betterhitreg.utility;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityDamageS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.sound.SoundCategory;
+import you.jass.betterhitreg.hitreg.Hitreg;
+import you.jass.betterhitreg.settings.Toggle;
+
+import java.awt.*;
+import java.util.*;
+
+import static you.jass.betterhitreg.hitreg.Hitreg.alreadyAnimated;
+import static you.jass.betterhitreg.hitreg.Hitreg.client;
+import static you.jass.betterhitreg.hitreg.Hitreg.isToggled;
+import static you.jass.betterhitreg.hitreg.Hitreg.last100Regs;
+import static you.jass.betterhitreg.hitreg.Hitreg.lastAnimation;
+import static you.jass.betterhitreg.hitreg.Hitreg.lastAttack;
+import static you.jass.betterhitreg.hitreg.Hitreg.lastAttacked;
+import static you.jass.betterhitreg.hitreg.Hitreg.lastTarget;
+import static you.jass.betterhitreg.hitreg.Hitreg.target;
+import static you.jass.betterhitreg.utility.MultiVersion.*;
+
+public class PacketProcessor {
+    public static long dealtDamageTimestamp;
+    public static long tookDamageTimestamp;
+
+    public static boolean processDamage(EntityDamageS2CPacket packet) {
+        //on network thread?
+        if (!MinecraftClient.getInstance().isOnThread()) {
+            if (lastTarget == packet.entityId()) {
+                dealtDamageTimestamp = System.currentTimeMillis();
+            } else if (Hitreg.playerId == packet.entityId()) tookDamageTimestamp = System.currentTimeMillis();
+        }
+
+        //on main thread?
+        else {
+            if (lastTarget == packet.entityId()) {
+                //if processing never ran on the network thread, we need to update the timestamp here
+                if (System.currentTimeMillis() - dealtDamageTimestamp > 50) dealtDamageTimestamp = System.currentTimeMillis() - 2;
+
+                boolean isToggled = isToggled();
+                boolean withinFight = Hitreg.withinFight;
+                boolean hasBeenAnimated = alreadyAnimated;
+                HitTracker.add(new Animation(dealtDamageTimestamp));
+                lastAnimation = dealtDamageTimestamp;
+                alreadyAnimated = true;
+                long delay = dealtDamageTimestamp - lastAttack;
+                if (Toggle.ALERT_DELAYS.toggled() && !hasBeenAnimated && delay <= 500) message("hitreg §7was §f" + delay + "§7ms", "/hitreg alertDelays");
+                if (delay <= 500) last100Regs.addDelay((int) delay);
+                if (!isToggled && withinFight && Toggle.PARTICLES_EVERY_HIT.toggled()) playParticles("ENCHANTED_HIT", target);
+                processDelayedSounds(true);
+            }
+
+            else if (client.player.getId() == packet.entityId()) {
+                //if processing never ran on the network thread, we need to update the timestamp here
+                if (System.currentTimeMillis() - tookDamageTimestamp > 50) tookDamageTimestamp = System.currentTimeMillis() - 2;
+
+                lastAttacked = tookDamageTimestamp;
+                processDelayedSounds(false);
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean processAnimation(EntityAnimationS2CPacket packet) {
+        if (lastTarget != getAnimationId(packet)) return true;
+        boolean isToggled = isToggled();
+        boolean withinFight = Hitreg.withinFight;
+
+        //crit particle
+        if (packet.getAnimationId() == 4) {
+            if (isToggled && withinFight) return false;
+        }
+
+        //enchanted particle
+        else if (packet.getAnimationId() == 5) {
+            if ((Toggle.PARTICLES_EVERY_HIT.toggled() || isToggled) && withinFight) return false;
+        }
+
+        return true;
+    }
+
+    public static boolean processSound(PlaySoundS2CPacket packet) {
+        Sound sound = new Sound(packet);
+        sound.register();
+
+        if (sound.modern || sound.legacy) {
+            boolean result = processSound(sound);
+            if (!isToggled() && !Toggle.SILENCE_SELF.toggled() && !Toggle.SILENCE_THEM.toggled() && !Toggle.SILENCE_OTHER_FIGHTS.toggled()) {
+                sound.skip = true;
+                return true;
+            }
+            return result;
+        }
+
+        return true;
+    }
+
+    private static final Queue<Sound> delayedSounds = new LinkedList<>();
+    private static final Queue<Sound> delayedSoundRegistration = new LinkedList<>();
+
+    private static void processDelayedSounds(boolean fromYou) {
+        if (client.world == null || client.player == null) return;
+        //register delayed sounds to the hit tracker
+        if (fromYou) {
+            while (!delayedSoundRegistration.isEmpty()) {
+                Sound sound = delayedSoundRegistration.poll();
+                if (sound.wasRecent()) new Sound(sound.packet).register();
+            }
+        }
+
+        //play delayed sounds
+        Sound sound;
+        while ((sound = delayedSounds.poll()) != null) {
+            if (sound.skip) continue;
+            boolean shouldPlay;
+            if (!sound.wasRecent()) shouldPlay = !Toggle.SILENCE_OTHER_FIGHTS.toggled();
+            else if (fromYou) shouldPlay = !Toggle.SILENCE_SELF.toggled() && !isToggled();
+            else shouldPlay = !Toggle.SILENCE_THEM.toggled();
+            if (shouldPlay) sound.play();
+        }
+    }
+
+    private static boolean processSound(Sound sound) {
+        boolean isToggled = isToggled();
+        boolean playerWithinFight = Hitreg.withinFight;
+        boolean soundWithinFight = sound.withinFight();
+
+        //if the sound happened far away, then block it if were silencing other fights and skip it if were not
+        if (!playerWithinFight || !soundWithinFight) return !Toggle.SILENCE_OTHER_FIGHTS.toggled();
+
+        //block nodamage sounds because they don't actually register hits so we don't know who they're from
+        if (isToggled && sound.sound.contains("nodamage")) return false;
+
+        //if the sound wasn't from either of you
+        boolean fromYou = sound.wasFromYou();
+        boolean fromThem = sound.wasFromThem();
+        if (!fromYou && !fromThem) {
+            //delay knockback sounds because for some reason knockback sounds come before hit registration on most servers
+            //don't delay it if its already been processed though, or it would just keep delaying indefinitely
+            //if it was from either of you, no need to delay it as it came after hit registration, minemenclub sends it after
+            if (!sound.processed && sound.sound.contains("knockback")) {
+                sound.processed = true;
+                delayedSounds.add(sound);
+                delayedSoundRegistration.add(sound);
+                return false;
+            }
+
+            //if it wasn't from either of you and were silencing other fights, silence it
+            if (Toggle.SILENCE_OTHER_FIGHTS.toggled()) return false;
+        }
+
+        //block the sound based on whether you hit them or they hit you
+        if (fromYou && (isToggled || Toggle.SILENCE_SELF.toggled())) return false;
+        if (fromThem && Toggle.SILENCE_THEM.toggled()) return false;
+
+        //block all modern attack sounds if legacy sounds are enabled
+        if (!sound.legacy && Toggle.LEGACY_SOUNDS.toggled() && !sound.sound.contains("hurt")) return false;
+
+        return true;
+    }
+}

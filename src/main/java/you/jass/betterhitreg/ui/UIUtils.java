@@ -1,11 +1,29 @@
 package you.jass.betterhitreg.ui;
 
 import net.minecraft.client.font.TextRenderer;
-import you.jass.betterhitreg.util.MultiVersion;
+import you.jass.betterhitreg.utility.MultiVersion;
 
 import java.awt.*;
 
 public final class UIUtils {
+    private static float shift = 0f;
+    private static final float STEP = 0.01f;
+    private static final long TICK_INTERVAL_NS = 50_000_000L;
+    private static long lastTickTime = System.nanoTime();
+
+    public static void update() {
+        long now = System.nanoTime();
+        if (now - lastTickTime >= TICK_INTERVAL_NS) {
+            lastTickTime += TICK_INTERVAL_NS;
+            shift += STEP;
+            if (shift >= 1f) shift -= 1f;
+        }
+    }
+
+    public static float getShift() {
+        return shift;
+    }
+
     public static void drawRectangle(Object renderer, int x, int y, int w, int h, Color c) {
         MultiVersion.drawRectangle(renderer, x, y, w, h, c);
     }

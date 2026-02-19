@@ -3,10 +3,9 @@ package you.jass.betterhitreg.settings;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import you.jass.betterhitreg.util.MultiVersion;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static you.jass.betterhitreg.util.MultiVersion.message;
+import static you.jass.betterhitreg.utility.MultiVersion.message;
 
 public class Commands {
     public static void initialize() {
@@ -43,9 +42,7 @@ public class Commands {
             message(toggle.label() + ": " + onOrOff(toggle.toggled()), "/hitreg " + toggle.key());
         }
 
-        message("§7first hits & shields " + (Toggle.SAFE_REGS_ONLY.toggled() ? "will no longer" : "will now") + " use custom hitreg", "/hitreg safeRegsOnly");
-
-        if (Boolean.parseBoolean(Settings.get("tutorial"))) Settings.set("tutorial", "false");
+        if (Settings.getBoolean("tutorial")) Settings.set("tutorial", "false");
         return 1;
     }
 

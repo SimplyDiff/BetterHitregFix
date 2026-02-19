@@ -1,22 +1,33 @@
 package you.jass.betterhitreg.hitreg;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.item.Items;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.Vec3d;
+import you.jass.betterhitreg.settings.Settings;
 import you.jass.betterhitreg.settings.Toggle;
-import you.jass.betterhitreg.util.MultiVersion;
-import you.jass.betterhitreg.util.OnlyAnimate;
+import you.jass.betterhitreg.utility.HitTracker;
+import you.jass.betterhitreg.utility.MultiVersion;
+import you.jass.betterhitreg.utility.OnlyAnimate;
+import you.jass.betterhitreg.utility.Scheduler;
 
-import static you.jass.betterhitreg.hitreg.Hitreg.client;
-import static you.jass.betterhitreg.util.MultiVersion.getPosition;
-import static you.jass.betterhitreg.util.MultiVersion.playParticles;
+import java.util.ArrayList;
+
+import static you.jass.betterhitreg.hitreg.Hitreg.*;
+import static you.jass.betterhitreg.hitreg.Hitreg.alreadyAnimated;
+import static you.jass.betterhitreg.hitreg.Hitreg.alreadyKnockedBack;
+import static you.jass.betterhitreg.hitreg.Hitreg.lastTarget;
+import static you.jass.betterhitreg.hitreg.Hitreg.newTarget;
+import static you.jass.betterhitreg.hitreg.Hitreg.sprintIsReset;
+import static you.jass.betterhitreg.utility.MultiVersion.*;
 
 public class Hit {
     public LivingEntity target;
+    public float cooldown;
     public boolean tooEarlyForDamage;
     public boolean tooEarlyForSpecial;
+    public boolean hadShield;
+    public boolean wasBlocked;
     public boolean wasSprinting;
     public boolean wasFalling;
     public boolean wasOnGround;
@@ -28,60 +39,68 @@ public class Hit {
     public boolean swordHadSharpness;
     public boolean sprintWasReset;
 
-    //run this on the main thread
+    public boolean shouldAnimate;
+    public boolean shouldMakeSound;
+    public boolean shouldSoundBeLegacy;
+    public boolean shouldSpawnParticles;
+    public boolean shouldKnockback;
+    public boolean shouldCrit;
+    public boolean shouldSweep;
+    public boolean shouldPick;
+    public boolean shouldFullPick;
+    public boolean shouldHalfPick;
+    public boolean shouldSpawnSharpnessParticles;
+
+    public SoundEvent expectedSound;
+    public HitType type;
+    public ArrayList<HitType> potentialServerTypes = new ArrayList<>();
+    public boolean wasServerRight;
+    public boolean wasAnimated;
+    public boolean wasNewTarget;
+    public boolean wasHitByAnother;
+    public long timestamp;
+
+    public Hit() {
+        timestamp = System.currentTimeMillis();
+    }
+
+    public void updateSettings() {
+        shouldAnimate = !Toggle.HIDE_ANIMATIONS.toggled() && !tooEarlyForDamage;
+        shouldMakeSound = !Toggle.SILENCE_SELF.toggled();
+        shouldSoundBeLegacy = Toggle.LEGACY_SOUNDS.toggled();
+        shouldSpawnParticles = !Toggle.HIDE_ALL_PARTICLES.toggled();
+        shouldSpawnSharpnessParticles = !Toggle.HIDE_OTHER_PARTICLES.toggled() && (swordHadSharpness || Toggle.PARTICLES_EVERY_HIT.toggled());
+    }
+
+    public void load() {
+        shouldKnockback = !tooEarlyForSpecial && wasSprinting && sprintWasReset;
+        shouldCrit = !tooEarlyForSpecial && !shouldKnockback && wasFalling && !wasOnGround && !wasClimbing && !wasTouchingWater && !wasInVehicle && !wasBlind;
+        shouldSweep = !tooEarlyForSpecial && wasHoldingSword && wasOnGround && (!wasSprinting);
+        shouldPick = !shouldKnockback && !shouldCrit && !shouldSweep;
+        shouldFullPick = !tooEarlyForSpecial && shouldPick;
+        shouldHalfPick = !shouldFullPick && shouldPick;
+
+        type = HitType.of(this);
+        if (type == null) return;
+        expectedSound = type.getMainSound();
+
+        if (!tooEarlyForDamage) HitTracker.add(this);
+        if (Hitreg.isToggled()) Scheduler.schedule(Settings.getHitreg(), this::run);
+    }
+
     public void run() {
         if (target == null) return;
-
-        boolean shouldAnimate = !Toggle.HIDE_ANIMATIONS.toggled() && !tooEarlyForDamage;
-        boolean shouldMakeSound = !Toggle.SILENCE_SELF.toggled();
-        boolean shouldSoundBeLegacy = Toggle.LEGACY_SOUNDS.toggled();
-        boolean shouldSpawnParticles = !Toggle.HIDE_ALL_PARTICLES.toggled();
-        boolean shouldKnockback = !tooEarlyForSpecial && wasSprinting && this.sprintWasReset;
-        boolean shouldCrit = !tooEarlyForSpecial && !shouldKnockback && wasFalling && !wasOnGround && !wasClimbing && !wasTouchingWater && !wasInVehicle && !wasBlind;
-        boolean shouldSweep = !tooEarlyForSpecial && wasHoldingSword && !wasSprinting && wasOnGround;
-        boolean shouldPick = !shouldKnockback && !shouldCrit && !shouldSweep;
-        boolean shouldFullPick = !tooEarlyForSpecial && shouldPick;
-        boolean shouldHalfPick = !shouldFullPick && shouldPick;
-        boolean shouldSpawnSharpnessParticles = !Toggle.HIDE_OTHER_PARTICLES.toggled() && (swordHadSharpness || Toggle.PARTICLES_EVERY_HIT.toggled());
+        updateSettings();
 
         if (shouldAnimate) target.onDamaged(new OnlyAnimate(target.getDamageSources().generic()));
 
         if (shouldMakeSound) {
-            Vec3d location = getPosition(target);
+            Vec3d location = getLerpedPosition(target);
 
             if (shouldSoundBeLegacy) {
-                if (!tooEarlyForDamage) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1, 1);
-                }
+                if (!tooEarlyForDamage) HitType.HALF_PICK.playSounds(location);
             } else {
-                if (tooEarlyForDamage) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, SoundCategory.PLAYERS, 1, 1);
-                }
-
-                else if (shouldKnockback) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, SoundCategory.PLAYERS, 1, 1);
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, SoundCategory.PLAYERS, 1, 1);
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1, 1);
-                }
-
-                else if (shouldCrit) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 1, 1);
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1, 1);
-                }
-
-                else if (shouldSweep) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1, 1);
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1, 1);
-                }
-
-                else if (shouldFullPick) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, SoundCategory.PLAYERS, 1, 1);
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1, 1);
-                }
-
-                else if (shouldHalfPick) {
-                    client.world.playSound(client.player, location.x, location.y, location.z, SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1, 1);
-                }
+                type.playSounds(location);
             }
         }
 

@@ -1,18 +1,28 @@
 package you.jass.betterhitreg.ui;
 
+//version 1.19.4
+//import net.minecraft.client.util.math.MatrixStack;
+
+//version 1.20+
 import net.minecraft.client.gui.DrawContext;
+
+//version 1.21.9+
+import net.minecraft.client.gui.Click;
+
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
+
 import net.minecraft.text.Text;
 import you.jass.betterhitreg.hitreg.Hitreg;
 import you.jass.betterhitreg.settings.Settings;
 import you.jass.betterhitreg.settings.Toggle;
+import you.jass.betterhitreg.utility.MultiVersion;
+import you.jass.betterhitreg.utility.Render;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static you.jass.betterhitreg.util.MultiVersion.message;
+import static you.jass.betterhitreg.utility.MultiVersion.message;
 
 public class UIScreen extends Screen {
     private final List<UIElement> widgets = new ArrayList<>();
@@ -21,315 +31,420 @@ public class UIScreen extends Screen {
         super(Text.of("Custom Settings"));
     }
 
-    private final Color background = new Color(30, 30, 30, 230);
-    private final Color border = new Color(100, 100, 100, 255);
-    private final Color text = new Color(222, 222, 222, 255);
-    private final Color hovered = new Color(255, 243, 166, 255);
-    private final Color highlighted = new Color(255, 232, 108, 255);
-    private final Theme label = new Theme(background, border, text, hovered, highlighted);
-    private final Theme checkbox = new Theme(background, border, text, hovered, highlighted);
-    private final Theme slider = new Theme(background.darker(), border, text, hovered, highlighted);
-    private final Theme panel = new Theme(background, border, text, hovered, highlighted);
-    private final Theme header = new Theme(highlighted, highlighted, highlighted, highlighted, highlighted);
-    private final Theme footer = new Theme(text.darker().darker(), text.darker().darker(), text.darker().darker(), text.darker().darker(), text.darker().darker());
-
     @Override
     protected void init() {
         super.init();
+
         if (Settings.isTutorial()) Settings.set("tutorial", "false");
+        Settings.load();
+        Render.updateColors();
 
         widgets.clear();
 
-        int hsize = 150;
-        int vsize = 270;
-        int vertical = vsize / 2;
-        int horizontal = hsize / 2;
-        int centerX = width / 2;
-        int centerY = height / 2;
-        int start = vertical - 10;
-        int vgap = 12;
-        int hgap = 120;
-        int sgap = 16;
-        int swidth = 77;
-        int sstart = 35;
-        int textAlignment = 66;
+        int panelWidthCenter = width / 2;
+        int panelHeightCenter = height / 2;
+        int panelWidth  = 350;
+        int panelHeight = 250;
+        int halfPanelWidth  = panelWidth / 2;
+        int halfPanelHeight = panelHeight / 2;
+        int column1Start = 160;
+        int column2Start = -5;
+        int horizontalGap = 145;
+        int rowStart = 125;
+        int sliderWidth = 135;
+        int sliderStart = 128;
+        int sliderGap = 18;
+        int verticalGap = 13;
 
-        widgets.add(new UIPanel(centerX - horizontal, centerY - vertical, hsize, vsize, panel, false));
+        Color background = new Color(Render.getColor("background_color", "background_opacity"), true);
+        Color border = new Color(Render.getColor("border_color", "border_opacity"), true);
+        Color text = new Color(Render.getColor("text_color", "text_opacity"), true);
+        Color hovered = new Color(Render.getColor("hovered_color", "hovered_opacity"), true);
+        Color highlighted = new Color(Render.getColor("highlighted_color", "highlighted_opacity"), true);
+        UITheme checkbox = new UITheme(border, border, text, hovered, highlighted);
+        UITheme slider = new UITheme(border.darker().darker(), border.darker(), text, hovered, highlighted);
+        UITheme panel = new UITheme(background, background, background, background, background);
+        UITheme header = new UITheme(highlighted, highlighted, highlighted, highlighted, highlighted);
+        UITheme category = new UITheme(border, border, border, border, border);
+        UITheme footer = new UITheme(border.darker(), border.darker(), border.darker(), border.darker(), border.darker());
+
+        widgets.add(new UIPanel(panelWidthCenter - halfPanelWidth, panelHeightCenter - halfPanelHeight, panelWidth, panelHeight, panel, false));
 
         widgets.add(new UILabel(
-                centerX,
-                centerY - vertical + 10,
-                textRenderer, "BetterHitreg v1.0.4",
+                panelWidthCenter,
+                panelHeightCenter - halfPanelHeight + 10,
+                textRenderer, "BetterHitreg v1.0.5",
                 header, true, true
         ));
 
         widgets.add(new UILabel(
-                centerX,
-                centerY + vertical - 7,
-                textRenderer, "Made by Jass",
+                panelWidthCenter,
+                panelHeightCenter + halfPanelHeight - 10,
+                textRenderer, "Made by Jass • Modrinth.com/mod/betterhitreg • " + MultiVersion.getVersion(),
                 footer, true, true
         ));
 
-        widgets.add(new UILabel(
-                centerX - textAlignment,
-                centerY - start + vgap,
-                textRenderer, "Hitreg",
-                label, false, false
-        ));
-
         widgets.add(new UISlider(
-                centerX - sstart,
-                centerY - start + vgap,
-                swidth, 0, 300, Settings.getHitreg(), sgap, 5,
-                "", "ᴍs",
-                textRenderer, slider, false,
+                panelWidthCenter - sliderStart,
+                panelHeightCenter - rowStart + verticalGap * 2,
+                panelWidthCenter - column1Start,
+                sliderWidth, 0, 300, Settings.getHitreg(), sliderGap, 1,
+                "Hitreg", "", "ᴍs",
+                textRenderer, slider, false, false,
                 v -> {},
                 v -> {
-                    Settings.set("hitreg", String.valueOf(v));
+                    Settings.setInt("hitreg", v);
                     message("hitreg §7set to §f" + v + "§7ms", "/hitreg set 0");
                 }
         ));
 
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 2,
-                10, hgap,
-                textRenderer, "Enabled",
-                checkbox, false,
+                panelWidthCenter - column2Start + 53,
+                panelHeightCenter - rowStart + verticalGap * 2,
+                10, 92,
+                textRenderer, "Enable Hitreg",
+                checkbox, true,
                 Toggle.TOGGLE.toggled(),
                 checked -> Toggle.TOGGLE.toggle()
         ));
 
+        widgets.add(new UILabel(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 3,
+                textRenderer, "Utility",
+                category, false, false
+        ));
+
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 3,
-                10, hgap,
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 4,
+                10, horizontalGap,
                 textRenderer, "Safe Regs Only",
-                checkbox, false,
+                checkbox, true,
                 Toggle.SAFE_REGS_ONLY.toggled(),
                 checked -> Toggle.SAFE_REGS_ONLY.toggle()
         ));
 
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 4,
-                10, hgap,
-                textRenderer, "Mute Other Fights",
-                checkbox, false,
-                Toggle.SILENCE_OTHER_FIGHTS.toggled(),
-                checked -> Toggle.SILENCE_OTHER_FIGHTS.toggle()
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 5,
+                10, horizontalGap,
+                textRenderer, "Ignore Shield Holders",
+                checkbox, true,
+                Toggle.IGNORE_SHIELD_HOLDERS.toggled(),
+                checked -> Toggle.IGNORE_SHIELD_HOLDERS.toggle()
         ));
 
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 5,
-                10, hgap,
-                textRenderer, "Hide Other Fights",
-                checkbox, false,
-                Toggle.HIDE_OTHER_FIGHTS.toggled(),
-                checked -> Toggle.HIDE_OTHER_FIGHTS.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 6,
-                10, hgap,
-                textRenderer, "Hide Animations",
-                checkbox, false,
-                Toggle.HIDE_ANIMATIONS.toggled(),
-                checked -> Toggle.HIDE_ANIMATIONS.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 7,
-                10, hgap,
-                textRenderer, "Hide Armor",
-                checkbox, false,
-                Toggle.HIDE_ARMOR.toggled(),
-                checked -> Toggle.HIDE_ARMOR.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 8,
-                10, hgap,
-                textRenderer, "Hide All Particles",
-                checkbox, false,
-                Toggle.HIDE_ALL_PARTICLES.toggled(),
-                checked -> Toggle.HIDE_ALL_PARTICLES.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 9,
-                10, hgap,
-                textRenderer, "Hide Other Particles",
-                checkbox, false,
-                Toggle.HIDE_OTHER_PARTICLES.toggled(),
-                checked -> Toggle.HIDE_OTHER_PARTICLES.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 10,
-                10, hgap,
-                textRenderer, "Always Hit Particles",
-                checkbox, false,
-                Toggle.PARTICLES_EVERY_HIT.toggled(),
-                checked -> Toggle.PARTICLES_EVERY_HIT.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 11,
-                10, hgap,
-                textRenderer, "1.8 Hit Sounds",
-                checkbox, false,
-                Toggle.LEGACY_SOUNDS.toggled(),
-                checked -> Toggle.LEGACY_SOUNDS.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 12,
-                10, hgap,
-                textRenderer, "Mute Non-hit Sounds",
-                checkbox, false,
-                Toggle.SILENCE_NON_HITS.toggled(),
-                checked -> Toggle.SILENCE_NON_HITS.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 13,
-                10, hgap,
-                textRenderer, "Mute Your Hits",
-                checkbox, false,
-                Toggle.SILENCE_SELF.toggled(),
-                checked -> Toggle.SILENCE_SELF.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 14,
-                10, hgap,
-                textRenderer, "Mute Their Hits",
-                checkbox, false,
-                Toggle.SILENCE_THEM.toggled(),
-                checked -> Toggle.SILENCE_THEM.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 15,
-                10, hgap,
-                textRenderer, "Muffled Hit Sounds",
-                checkbox, false,
-                Toggle.MUFFLED_HITSOUNDS.toggled(),
-                checked -> Toggle.MUFFLED_HITSOUNDS.toggle()
-        ));
-
-        widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 16,
-                10, hgap,
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 6,
+                10, horizontalGap,
                 textRenderer, "Alert Delays (" + Hitreg.last100Regs.getAverageDelay() + "ms)",
-                checkbox, false,
+                checkbox, true,
                 Toggle.ALERT_DELAYS.toggled(),
                 checked -> Toggle.ALERT_DELAYS.toggle()
         ));
 
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 17,
-                10, hgap,
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 7,
+                10, horizontalGap,
                 textRenderer, "Alert Ghosts (" + Hitreg.last100Regs.getGhostRatio() + "%)",
-                checkbox, false,
+                checkbox, true,
                 Toggle.ALERT_GHOSTS.toggled(),
                 checked -> Toggle.ALERT_GHOSTS.toggle()
         ));
 
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 18,
-                10, hgap,
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 8,
+                10, horizontalGap,
+                textRenderer, "Alert Misplaces (" + Hitreg.last100Regs.getInconsistencyRatio() + "%)",
+                checkbox, true,
+                Toggle.ALERT_INCONSISTENCIES.toggled(),
+                checked -> Toggle.ALERT_INCONSISTENCIES.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 9,
+                10, horizontalGap,
+                textRenderer, "Alert Fight Durations",
+                checkbox, true,
+                Toggle.ALERT_FIGHTS.toggled(),
+                checked -> Toggle.ALERT_FIGHTS.toggle()
+        ));
+
+        widgets.add(new UILabel(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 10,
+                textRenderer, "Audio",
+                category, false, false
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 11,
+                10, horizontalGap,
+                textRenderer, "Mute Other Fights",
+                checkbox, true,
+                Toggle.SILENCE_OTHER_FIGHTS.toggled(),
+                checked -> Toggle.SILENCE_OTHER_FIGHTS.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 12,
+                10, horizontalGap,
+                textRenderer, "1.8 Hit Sounds",
+                checkbox, true,
+                Toggle.LEGACY_SOUNDS.toggled(),
+                checked -> Toggle.LEGACY_SOUNDS.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 13,
+                10, horizontalGap,
+                textRenderer, "Mute Non-hit Sounds",
+                checkbox, true,
+                Toggle.SILENCE_NON_HITS.toggled(),
+                checked -> Toggle.SILENCE_NON_HITS.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 14,
+                10, horizontalGap,
+                textRenderer, "Mute Your Hits",
+                checkbox, true,
+                Toggle.SILENCE_SELF.toggled(),
+                checked -> Toggle.SILENCE_SELF.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 15,
+                10, horizontalGap,
+                textRenderer, "Mute Their Hits",
+                checkbox, true,
+                Toggle.SILENCE_THEM.toggled(),
+                checked -> Toggle.SILENCE_THEM.toggle()
+        ));
+
+        widgets.add(new UISlider(
+                panelWidthCenter - sliderStart + 25,
+                panelHeightCenter - rowStart + verticalGap * 16,
+                panelWidthCenter - column1Start,
+                sliderWidth - 55, 0, 100, Settings.getFloat("muffle_amount") * 100, sliderGap - 4, 5,
+                "Hit Muffling", "", "%",
+                textRenderer, slider, true, true,
+                v -> {},
+                v -> {
+                    Settings.setFloat("muffle_amount", v / 100f);
+                    if (v < 10) message("hitsound muffling §cdisabled", "/hitreg metronome");
+                    else message("hitsound muffling §7set to §f" + v + "§7%", "/hitreg metronome " + v);
+                }
+        ));
+
+        widgets.add(new UISlider(
+                panelWidthCenter - sliderStart + 22,
+                panelHeightCenter - rowStart + verticalGap * 17,
+                panelWidthCenter - column1Start,
+                sliderWidth - 49, 9, 25, Settings.getInt("metronome"), sliderGap - 7, 1,
+                "Metronome", "", "t",
+                textRenderer, slider, true, true,
+                v -> {},
+                v -> {
+                    if (v < 10) {
+                        Settings.set("metronome", "0");
+                        message("metronome §cdisabled", "/hitreg metronome");
+                    } else {
+                        Settings.setInt("metronome", v);
+                        message("metronome §7set to §f" + v + " §7ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
+                    }
+                }
+        ));
+
+        widgets.add(new UILabel(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 3,
+                textRenderer, "Render",
+                category, false, false
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 4,
+                10, horizontalGap,
+                textRenderer, "Hide Other Fights",
+                checkbox, true,
+                Toggle.HIDE_OTHER_FIGHTS.toggled(),
+                checked -> Toggle.HIDE_OTHER_FIGHTS.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 5,
+                10, horizontalGap,
+                textRenderer, "Hide Animations",
+                checkbox, true,
+                Toggle.HIDE_ANIMATIONS.toggled(),
+                checked -> Toggle.HIDE_ANIMATIONS.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 6,
+                10, horizontalGap,
+                textRenderer, "Hide Armor",
+                checkbox, true,
+                Toggle.HIDE_ARMOR.toggled(),
+                checked -> Toggle.HIDE_ARMOR.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 7,
+                10, horizontalGap,
+                textRenderer, "Hide All Particles",
+                checkbox, true,
+                Toggle.HIDE_ALL_PARTICLES.toggled(),
+                checked -> Toggle.HIDE_ALL_PARTICLES.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 8,
+                10, horizontalGap,
+                textRenderer, "Hide Other Particles",
+                checkbox, true,
+                Toggle.HIDE_OTHER_PARTICLES.toggled(),
+                checked -> Toggle.HIDE_OTHER_PARTICLES.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 9,
+                10, horizontalGap,
+                textRenderer, "Always Hit Particles",
+                checkbox, true,
+                Toggle.PARTICLES_EVERY_HIT.toggled(),
+                checked -> Toggle.PARTICLES_EVERY_HIT.toggle()
+        ));
+
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 10,
+                10, horizontalGap,
                 textRenderer, "Render Target Hitbox",
-                checkbox, false,
+                checkbox, true,
                 Toggle.RENDER_HITBOX.toggled(),
                 checked -> Toggle.RENDER_HITBOX.toggle()
         ));
 
         widgets.add(new UICheckbox(
-                centerX - textAlignment,
-                centerY - start + vgap * 19,
-                10, hgap,
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 11,
+                10, horizontalGap,
                 textRenderer, "Render Target Cross",
-                checkbox, false,
+                checkbox, true,
                 Toggle.RENDER_CROSS.toggled(),
                 checked -> Toggle.RENDER_CROSS.toggle()
         ));
 
-        widgets.add(new UILabel(
-                centerX,
-                centerY - start + vgap * 20,
-                textRenderer, "You: " + (Hitreg.getPlayersPing() > -1 ? Hitreg.getPlayersPing() : "?") + "ᴍs"
-                + " Them: " + (Hitreg.getTargetsPing() > -1 ? Hitreg.getTargetsPing() : "?") + "ᴍs",
-                label, false, true
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column2Start,
+                panelHeightCenter - rowStart + verticalGap * 12,
+                10, horizontalGap,
+                textRenderer, "Render Reach Ring",
+                checkbox, true,
+                Toggle.RENDER_RING.toggled(),
+                checked -> Toggle.RENDER_RING.toggle()
         ));
     }
 
-    //TODO 1.19.4
+    //version 1.19.4
 //    @Override
 //    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
 //        for (UIElement w : widgets) {
 //            w.render(matrixStack, mouseX, mouseY);
 //        }
-//
 //        super.render(matrixStack, mouseX, mouseY, delta);
 //    }
-//
-//    @Override
-//    public void renderBackground(MatrixStack matrixStack) {}
 
-    //TODO 1.20 - 1.21.8
+    //version 1.20+
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         for (UIElement w : widgets) {
             w.render(ctx, mouseX, mouseY);
         }
-
         super.render(ctx, mouseX, mouseY, delta);
     }
 
-    @Override
-    public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {}
+    //version 1.19.4
+//    @Override
+//    public void renderBackground(MatrixStack matrixStack) {}
 
-    //TODO 1.20 - 1.20.1
+    //version 1.20 - 1.20.1
 //    @Override
 //    public void renderBackground(DrawContext context) {}
 
+    //version 1.20.2+
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {}
+
+    //version 1.21.8-
+//    @Override
+//    public boolean mouseClicked(double mx, double my, int button) {
+//        for (UIElement w : widgets) {
+//            if (w.mouseClicked(mx, my, button)) return true;
+//        }
+//        return super.mouseClicked(mx, my, button);
+//    }
+
+    //version 1.21.8-
+//    @Override
+//    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+//        for (UIElement w : widgets) {
+//            if (w.mouseDragged(mx, my, button, dx, dy)) return true;
+//        }
+//        return false;
+//    }
+
+    //version 1.21.8-
+//    @Override
+//    public boolean mouseReleased(double mx, double my, int button) {
+//        for (UIElement w : widgets) {
+//            if (w.mouseReleased(mx, my, button)) return true;
+//        }
+//        return super.mouseReleased(mx, my, button);
+//    }
+
+    //version 1.21.9+
+    @Override
+    public boolean mouseClicked(Click click, boolean doubled) {
         for (UIElement w : widgets) {
-            if (w.mouseClicked(mx, my, button)) return true;
+            if (w.mouseClicked(click.x(), click.y(), click.button())) return true;
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(click, doubled);
     }
 
+    //version 1.21.9+
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
         for (UIElement w : widgets) {
-            if (w.mouseDragged(mx, my, button, dx, dy)) return true;
+            if (w.mouseDragged(click.x(), click.y(), click.button(), offsetX, offsetY)) return true;
         }
-        return false;
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
+    //version 1.21.9+
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(Click click) {
         for (UIElement w : widgets) {
-            if (w.mouseReleased(mx, my, button)) return true;
+            if (w.mouseReleased(click.x(), click.y(), click.button())) return true;
         }
-        return super.mouseReleased(mx, my, button);
+        return super.mouseReleased(click);
     }
 }

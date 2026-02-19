@@ -1,23 +1,23 @@
 package you.jass.betterhitreg.mixin;
 
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+//version 1.21.9
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import net.minecraft.client.util.ObjectAllocator;
+
+import net.minecraft.client.render.*;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import you.jass.betterhitreg.settings.Toggle;
-
-import static you.jass.betterhitreg.hitreg.Hitreg.client;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import you.jass.betterhitreg.utility.Render;
 
 @Mixin(WorldRenderer.class)
-public class WorldMixin {
-    @Inject(method = "spawnParticle(Lnet/minecraft/particle/ParticleEffect;ZZDDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
-    private void spawnParticle(ParticleEffect parameters, boolean alwaysSpawn, boolean canSpawnOnMinimal, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> cir) {
-        if (Toggle.HIDE_ALL_PARTICLES.toggled()) cir.cancel();
-        if (Toggle.HIDE_OTHER_PARTICLES.toggled() && parameters.getType() != ParticleTypes.CRIT && parameters.getType() != ParticleTypes.SWEEP_ATTACK) cir.cancel();
-        if (Toggle.HIDE_OTHER_FIGHTS.toggled() && client.player != null && client.player.squaredDistanceTo(x, y, z) > 30) cir.cancel();
-    }
+public abstract class WorldMixin {
+    //version 1.21.9
+//    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/FrameGraphBuilder;run(Lnet/minecraft/client/util/ObjectAllocator;Lnet/minecraft/client/render/FrameGraphBuilder$Profiler;)V", shift = At.Shift.AFTER))
+//    private void render(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, Matrix4f positionMatrix, Matrix4f matrix4f, Matrix4f projectionMatrix, GpuBufferSlice fogBuffer, Vector4f fogColor, boolean renderSky, CallbackInfo ci) {
+//        Render.render(camera);
+//    }
 }
