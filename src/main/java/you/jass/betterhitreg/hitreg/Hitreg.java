@@ -49,6 +49,7 @@ public class Hitreg {
     public static double distance;
     public static int playerId;
     public static int shouldMuffle;
+    public static int fightsThisSession;
     public static float muffleAmount;
     public static long lastNonGhost;
     public static boolean tutorialAlreadySeen;
@@ -88,9 +89,9 @@ public class Hitreg {
 
                 //if the fight lasted at least 10 seconds, at most 10 minutes, and you hit at least once, track it
                 if (duration >= 10 && duration <= 600 && lastNonGhost >= fightStartedAt) {
+                    fightsThisSession++;
                     Settings.addFight(duration);
-                    if (Toggle.ALERT_FIGHTS.toggled())
-                        message("fight §7took §f" + formatTime(duration) + " §7(#" + Settings.getInt("total_fights") + ")", "/hitreg alertDelays");
+                    if (Toggle.ALERT_FIGHTS.toggled()) message("fight §7took §f" + formatTime(duration) + " §7(#" + fightsThisSession + "/#" + Settings.getInt("total_fights") + ")", "/hitreg alertDelays");
                 }
             }
 
