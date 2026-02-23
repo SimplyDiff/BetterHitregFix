@@ -20,10 +20,15 @@ public class Commands {
                 }));
             }
 
-            root = root.then(ClientCommandManager.literal("set")
+            root = root.then(ClientCommandManager.literal("setHitreg")
                    .then(argument("value", IntegerArgumentType.integer())
-                   .executes(context -> set(IntegerArgumentType.getInteger(context, "value"))))
-                   .executes(context -> set(0)));
+                   .executes(context -> setHitreg(IntegerArgumentType.getInteger(context, "value"))))
+                   .executes(context -> setHitreg(0)));
+
+            root = root.then(ClientCommandManager.literal("setMuffle")
+                    .then(argument("value", IntegerArgumentType.integer())
+                    .executes(context -> setMuffle(IntegerArgumentType.getInteger(context, "value"))))
+                    .executes(context -> setMuffle(0)));
 
             dispatcher.register(root.executes(context -> guide()));
         });
@@ -54,7 +59,7 @@ public class Commands {
                 .toUpperCase();
     }
 
-    public static int set(int hitreg) {
+    public static int setHitreg(int hitreg) {
         if (hitreg < 0) {
             Settings.set("toggled", "false");
             message("custom hitreg §7is now §coff", "/hitreg " + Toggle.TOGGLE.key());
@@ -62,9 +67,21 @@ public class Commands {
         }
 
         Settings.set("hitreg", String.valueOf(hitreg));
-        message("hitreg §7set to §f" + hitreg + "§7ms", "/hitreg set 0");
+        message("hitreg §7set to §f" + hitreg + "§7ms", "/hitreg setHitreg 0");
 
         if (!Toggle.TOGGLE.toggled()) Toggle.TOGGLE.toggle();
+        return 1;
+    }
+
+    public static int setMuffle(int muffle) {
+        if (muffle <= 0) {
+            Settings.setFloat("muffle_amount", 0);
+            message("hitsound muffling §cdisabled", "/hitreg setMuffle 0");
+            return 1;
+        }
+
+        Settings.setFloat("muffle_amount", muffle / 100f);
+        message("hitsound muffling §7set to §f" + muffle + "§7%", "/hitreg setMuffle 0");
         return 1;
     }
 

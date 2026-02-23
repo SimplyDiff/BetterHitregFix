@@ -4,6 +4,7 @@ package you.jass.betterhitreg;
 //import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 
 //version 1.21.10+
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 
 import net.fabricmc.api.ModInitializer;
@@ -33,7 +34,7 @@ public class BetterHitreg implements ModInitializer {
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> tick());
 
-        //1.21.9 doesnt have worldrenderevents so we do it in WorldMixin
+        //1.21.9 doesn't have worldrenderevents so we do it in WorldMixin
 
         //version 1.21.8-
 //        WorldRenderEvents.END.register(context -> {

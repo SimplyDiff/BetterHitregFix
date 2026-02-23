@@ -49,8 +49,16 @@ public class Sound {
         client.world.playSound(client.player, packet.getX(), packet.getY(), packet.getZ(), packet.getSound(), packet.getCategory(), packet.getVolume(), packet.getPitch(), packet.getSeed());
     }
 
+    public boolean nearPlayer() {
+        return distanceFromPlayer(location) <= 5.5;
+    }
+
+    public boolean nearTarget() {
+        return distanceFromTarget(location) <= 5.5;
+    }
+
     public boolean withinFight() {
-        return distanceFromPlayer(location) <= 5.5 || distanceFromTarget(location) <= 5.5;
+        return nearPlayer() || nearTarget();
     }
 
     public boolean wasRecent() {
@@ -79,8 +87,6 @@ public class Sound {
     }
 
     public boolean couldBeFromYou() {
-        if (timestamp - lastAttack > 1000) return false;
-        if (distanceFromTimestamp(lastAnimation) > 50) return false;
-        return true;
+        return timestamp - lastAttack <= 500 && Hitreg.withinFight && nearTarget();
     }
 }

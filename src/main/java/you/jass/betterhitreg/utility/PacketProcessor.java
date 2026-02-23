@@ -101,19 +101,9 @@ public class PacketProcessor {
     }
 
     private static final Queue<Sound> delayedSounds = new LinkedList<>();
-    private static final Queue<Sound> delayedSoundRegistration = new LinkedList<>();
 
     private static void processDelayedSounds(boolean fromYou) {
         if (client.world == null || client.player == null) return;
-        //register delayed sounds to the hit tracker
-        if (fromYou) {
-            while (!delayedSoundRegistration.isEmpty()) {
-                Sound sound = delayedSoundRegistration.poll();
-                if (sound.wasRecent()) new Sound(sound.packet).register();
-            }
-        }
-
-        //play delayed sounds
         Sound sound;
         while ((sound = delayedSounds.poll()) != null) {
             if (sound.skip) continue;
@@ -131,7 +121,7 @@ public class PacketProcessor {
         boolean soundWithinFight = sound.withinFight();
 
         //if the sound happened far away, then block it if were silencing other fights and skip it if were not
-        if (!playerWithinFight || !soundWithinFight) return !Toggle.SILENCE_OTHER_FIGHTS.toggled();
+        if (playerWithinFight && !soundWithinFight) return !Toggle.SILENCE_OTHER_FIGHTS.toggled();
 
         //block nodamage sounds because they don't actually register hits so we don't know who they're from
         if (isToggled && sound.sound.contains("nodamage")) return false;
@@ -146,7 +136,6 @@ public class PacketProcessor {
             if (!sound.processed && sound.sound.contains("knockback")) {
                 sound.processed = true;
                 delayedSounds.add(sound);
-                delayedSoundRegistration.add(sound);
                 return false;
             }
 

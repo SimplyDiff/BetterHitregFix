@@ -45,6 +45,7 @@ public class HitTracker {
             if (hit.timestamp > now - 500) break;
 
             long maximumTimestamp = hit.timestamp + 500;
+            long animationTimestamp = 0;
 
             //remove all animations older than the hit
             while (!animations.isEmpty() && animations.peekFirst().timestamp < hit.timestamp) animations.pollFirst();
@@ -52,6 +53,7 @@ public class HitTracker {
             //is the oldest animation within 500ms of the hit, if so, mark it and remove it
             if (!animations.isEmpty() && animations.peekFirst().timestamp <= maximumTimestamp) {
                 hit.wasAnimated = true;
+                animationTimestamp = animations.peekFirst().timestamp;
                 animations.pollFirst();
             }
 
@@ -64,8 +66,8 @@ public class HitTracker {
                     //is the sound too late
                     if (sound.timestamp > maximumTimestamp) break;
 
-                    //add the sound's hit type to the potential server types for this hit
-                    hit.potentialServerTypes.add(sound.hitType);
+                    //is it within 50ms of the hits animation
+                    if (hit.wasAnimated && sound.distanceFromTimestamp(animationTimestamp) <= 50) hit.potentialServerTypes.add(sound.hitType);
                 }
 
                 //was the server right based on the sound they played

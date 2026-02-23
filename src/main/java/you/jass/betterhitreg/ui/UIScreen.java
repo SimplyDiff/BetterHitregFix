@@ -73,7 +73,7 @@ public class UIScreen extends Screen {
         widgets.add(new UILabel(
                 panelWidthCenter,
                 panelHeightCenter - halfPanelHeight + 10,
-                textRenderer, "BetterHitreg v1.0.5",
+                textRenderer, "BetterHitreg v1.0.6",
                 header, true, true
         ));
 
