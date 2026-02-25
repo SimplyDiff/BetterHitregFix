@@ -117,11 +117,10 @@ public class PacketProcessor {
 
     private static boolean processSound(Sound sound) {
         boolean isToggled = isToggled();
-        boolean playerWithinFight = Hitreg.withinFight;
         boolean soundWithinFight = sound.withinFight();
 
         //if the sound happened far away, then block it if were silencing other fights and skip it if were not
-        if (playerWithinFight && !soundWithinFight) return !Toggle.SILENCE_OTHER_FIGHTS.toggled();
+        if (!soundWithinFight) return !Toggle.SILENCE_OTHER_FIGHTS.toggled();
 
         //block nodamage sounds because they don't actually register hits so we don't know who they're from
         if (isToggled && sound.sound.contains("nodamage")) return false;
