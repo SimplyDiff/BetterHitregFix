@@ -55,7 +55,7 @@ public class Render {
         if (client.player == null) return;
         if (!isHitbox && !isCross && !isRing) return;
 
-        if (!Hitreg.bothAlive) {
+        if (!Hitreg.bothAlive || target.isInvisible() || target.isSpectator()) {
             if (isRing) ring(camera, 3, 64, 3, FAR_RING);
             return;
         }
