@@ -85,7 +85,7 @@ public class HitTracker {
             }
 
             //alert ghosts
-            if (!hit.wasNewTarget && !hit.wasBlocked && !hit.wasHitByAnother && !Hitreg.wasGhosted) {
+            if (!hit.wasNewTarget && !hit.wasHitByAnother && !hit.wasInvisible && !hit.wasBlocked && !Hitreg.wasGhosted) {
                 Hitreg.last100Regs.addGhost(!hit.wasAnimated);
                 if (Toggle.ALERT_GHOSTS.toggled() && !hit.wasAnimated) {
                     message("§7server §rghosted §7your §f" + hit.type.toString().toLowerCase() + " §7hit (cooldown: " + df.format(hit.cooldown) + ")", "/hitreg alertGhosts");

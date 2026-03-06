@@ -35,6 +35,7 @@ public class Hit {
     public boolean wasTouchingWater;
     public boolean wasInVehicle;
     public boolean wasBlind;
+    public boolean wasInvisible;
     public boolean wasHoldingSword;
     public boolean swordHadSharpness;
     public boolean sprintWasReset;

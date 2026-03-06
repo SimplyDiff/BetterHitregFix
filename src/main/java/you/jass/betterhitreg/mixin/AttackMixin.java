@@ -49,6 +49,7 @@ public abstract class AttackMixin {
         hit.sprintWasReset = sprintIsReset;
         hit.wasNewTarget = lastTarget != target.getId();
         hit.wasHitByAnother = target.timeUntilRegen > 10 && sinceLastHit >= 1000;
+        hit.wasInvisible = target.isInvisible();
 
         if (!hitEarly) {
             if (!fighting) fightStartedAt = System.currentTimeMillis();

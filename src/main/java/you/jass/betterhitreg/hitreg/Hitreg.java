@@ -46,6 +46,7 @@ public class Hitreg {
     public static double ground;
     public static boolean bothAlive;
     public static boolean withinFight;
+    public static boolean targetInvisible;
     public static double distance;
     public static int playerId;
     public static int shouldMuffle;
@@ -112,6 +113,7 @@ public class Hitreg {
         }
 
         if (target != null) {
+            targetInvisible = target.isInvisible() || target.isSpectator();
             previousTargetLocation = targetLocation;
             targetLocation = MultiVersion.getBasePosition(target);
         }
