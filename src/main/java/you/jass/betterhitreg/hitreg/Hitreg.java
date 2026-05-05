@@ -53,6 +53,7 @@ public class Hitreg {
     public static boolean wasOnGround;
     public static int lastJumpAge;
     public static int hurtAge;
+    public static boolean wasOnGroundWhenHit;
     public static int shouldMuffle;
     public static int fightsThisSession;
     public static float muffleAmount;

@@ -19,10 +19,13 @@ public class LivingEntityMixin {
         if ((Object) this == mc.player) {
             int age = mc.player.age;
             Hitreg.lastJumpAge = age;
-            // ping fires ON JUMP, only if player was recently hit (jumped AFTER the hit)
+            // ping fires ON JUMP, only if:
+            // 1. player was recently hit (jumped AFTER the hit)
+            // 2. player was on the ground when they were hit (not mid-air, which causes false positives)
             int ticksSinceHit = age - Hitreg.hurtAge;
             if (Toggle.JUMP_RESET_PING.toggled()
                     && Hitreg.wasMovingForward
+                    && Hitreg.wasOnGroundWhenHit
                     && ticksSinceHit >= 0 && ticksSinceHit <= 8) {
                 PingSound.play();
             }
@@ -34,6 +37,7 @@ public class LivingEntityMixin {
         MinecraftClient mc = MinecraftClient.getInstance();
         if ((Object) this == mc.player) {
             Hitreg.hurtAge = mc.player.age;
+            Hitreg.wasOnGroundWhenHit = mc.player.isOnGround();
         }
     }
 }
