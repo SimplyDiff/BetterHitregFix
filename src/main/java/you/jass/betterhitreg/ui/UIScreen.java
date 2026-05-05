@@ -1,4 +1,4 @@
-package you.jass.betterhitreg.ui;
+﻿package you.jass.betterhitreg.ui;
 
 //version 1.19.4
 //import net.minecraft.client.util.math.MatrixStack;
@@ -80,7 +80,7 @@ public class UIScreen extends Screen {
         widgets.add(new UILabel(
                 panelWidthCenter,
                 panelHeightCenter + halfPanelHeight - 10,
-                textRenderer, "Made by Jass • Modrinth.com/mod/betterhitreg • " + MultiVersion.getVersion(),
+                textRenderer, "Made by Jass â€¢ Modrinth.com/mod/betterhitreg â€¢ " + MultiVersion.getVersion(),
                 footer, true, true
         ));
 
@@ -89,12 +89,12 @@ public class UIScreen extends Screen {
                 panelHeightCenter - rowStart + verticalGap * 2,
                 panelWidthCenter - column1Start,
                 sliderWidth, 0, 300, Settings.getHitreg(), sliderGap, 1,
-                "Hitreg", "", "ᴍs",
+                "Hitreg", "", "á´s",
                 textRenderer, slider, false, false,
                 v -> {},
                 v -> {
                     Settings.setInt("hitreg", v);
-                    message("hitreg §7set to §f" + v + "§7ms", "/hitreg set 0");
+                    message("hitreg Â§7set to Â§f" + v + "Â§7ms", "/hitreg set 0");
                 }
         ));
 
@@ -232,7 +232,6 @@ public class UIScreen extends Screen {
                 checked -> Toggle.SILENCE_THEM.toggle()
         ));
 
-<<<<<<< HEAD
         widgets.add(new UICheckbox(
                 panelWidthCenter - column1Start,
                 panelHeightCenter - rowStart + verticalGap * 16,
@@ -246,11 +245,6 @@ public class UIScreen extends Screen {
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 25,
                 panelHeightCenter - rowStart + verticalGap * 17,
-=======
-        widgets.add(new UISlider(
-                panelWidthCenter - sliderStart + 25,
-                panelHeightCenter - rowStart + verticalGap * 16,
->>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
                 panelWidthCenter - column1Start,
                 sliderWidth - 55, 0, 100, Settings.getFloat("muffle_amount") * 100, sliderGap - 4, 5,
                 "Hit Muffling", "", "%",
@@ -258,18 +252,14 @@ public class UIScreen extends Screen {
                 v -> {},
                 v -> {
                     Settings.setFloat("muffle_amount", v / 100f);
-                    if (v < 10) message("hitsound muffling §cdisabled", "/hitreg metronome");
-                    else message("hitsound muffling §7set to §f" + v + "§7%", "/hitreg metronome " + v);
+                    if (v < 10) message("hitsound muffling Â§cdisabled", "/hitreg metronome");
+                    else message("hitsound muffling Â§7set to Â§f" + v + "Â§7%", "/hitreg metronome " + v);
                 }
         ));
 
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 22,
-<<<<<<< HEAD
                 panelHeightCenter - rowStart + verticalGap * 18,
-=======
-                panelHeightCenter - rowStart + verticalGap * 17,
->>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
                 panelWidthCenter - column1Start,
                 sliderWidth - 49, 9, 25, Settings.getInt("metronome"), sliderGap - 7, 1,
                 "Metronome", "", "t",
@@ -278,10 +268,10 @@ public class UIScreen extends Screen {
                 v -> {
                     if (v < 10) {
                         Settings.set("metronome", "0");
-                        message("metronome §cdisabled", "/hitreg metronome");
+                        message("metronome Â§cdisabled", "/hitreg metronome");
                     } else {
                         Settings.setInt("metronome", v);
-                        message("metronome §7set to §f" + v + " §7ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
+                        message("metronome Â§7set to Â§f" + v + " Â§7ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
                     }
                 }
         ));

@@ -1,14 +1,10 @@
-# Project exclude paths
+﻿# Project exclude paths
 /.gradle/
 /.idea/
 /build/
-<<<<<<< HEAD
 /run/
 /bin/
 /buildSrc/.gradle/
 /buildSrc/build/
 *.bak.*
 gradle.properties.bak*
-=======
-/run/
->>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
