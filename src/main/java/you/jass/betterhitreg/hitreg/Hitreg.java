@@ -49,6 +49,7 @@ public class Hitreg {
     public static boolean targetInvisible;
     public static double distance;
     public static int playerId;
+    public static long lastJumpTimestamp;
     public static int shouldMuffle;
     public static int fightsThisSession;
     public static float muffleAmount;

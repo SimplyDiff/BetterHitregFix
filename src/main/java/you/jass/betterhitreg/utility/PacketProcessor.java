@@ -63,12 +63,11 @@ public class PacketProcessor {
                 lastAttacked = tookDamageTimestamp;
                 processDelayedSounds(false);
 
-                // jump reset detection: player was hit while jumping (not on ground) and moving forward
+                // jump reset detection: jump must have happened within 200ms of the hit
                 if (Toggle.JUMP_RESET_PING.toggled()
                         && client.player != null
-                        && !client.player.isOnGround()
-                        && client.player.getVelocity().getY() > 0
-                        && client.options.forwardKey.isPressed()) {
+                        && Hitreg.wasMovingForward
+                        && Math.abs(tookDamageTimestamp - Hitreg.lastJumpTimestamp) <= 200) {
                     client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 2.0f));
                 }
             }
