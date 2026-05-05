@@ -17,7 +17,15 @@ public class LivingEntityMixin {
     private void onJump(CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if ((Object) this == mc.player) {
-            Hitreg.lastJumpAge = mc.player.age;
+            int age = mc.player.age;
+            Hitreg.lastJumpAge = age;
+            // ping fires ON JUMP, only if player was recently hit (jumped AFTER the hit)
+            int ticksSinceHit = age - Hitreg.hurtAge;
+            if (Toggle.JUMP_RESET_PING.toggled()
+                    && Hitreg.wasMovingForward
+                    && ticksSinceHit >= 0 && ticksSinceHit <= 8) {
+                PingSound.play();
+            }
         }
     }
 
@@ -26,12 +34,6 @@ public class LivingEntityMixin {
         MinecraftClient mc = MinecraftClient.getInstance();
         if ((Object) this == mc.player) {
             Hitreg.hurtAge = mc.player.age;
-            // a good jump reset: jumped within 6 ticks (300ms) of being hit
-            if (Toggle.JUMP_RESET_PING.toggled()
-                    && Hitreg.wasMovingForward
-                    && Math.abs(Hitreg.lastJumpAge - Hitreg.hurtAge) <= 6) {
-                PingSound.play();
-            }
         }
     }
 }
