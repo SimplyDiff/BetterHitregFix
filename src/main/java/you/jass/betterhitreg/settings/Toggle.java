@@ -23,8 +23,12 @@ public enum Toggle {
     HIDE_OTHER_FIGHTS("hideOtherFights", "hide other fights", false),
     RENDER_HITBOX("renderHitbox", "render target hitbox", false),
     RENDER_CROSS("renderCross", "render target cross", false),
+<<<<<<< HEAD
     RENDER_RING("renderRing", "render reach ring", false),
     PING_ON_HIT("pingOnHit", "ping on hit", false);
+=======
+    RENDER_RING("renderRing", "render reach ring", false);
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
 
     private final String key;
     private final String label;

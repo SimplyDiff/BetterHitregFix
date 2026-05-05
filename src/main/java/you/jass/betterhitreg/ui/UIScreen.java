@@ -232,6 +232,7 @@ public class UIScreen extends Screen {
                 checked -> Toggle.SILENCE_THEM.toggle()
         ));
 
+<<<<<<< HEAD
         widgets.add(new UICheckbox(
                 panelWidthCenter - column1Start,
                 panelHeightCenter - rowStart + verticalGap * 16,
@@ -245,6 +246,11 @@ public class UIScreen extends Screen {
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 25,
                 panelHeightCenter - rowStart + verticalGap * 17,
+=======
+        widgets.add(new UISlider(
+                panelWidthCenter - sliderStart + 25,
+                panelHeightCenter - rowStart + verticalGap * 16,
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
                 panelWidthCenter - column1Start,
                 sliderWidth - 55, 0, 100, Settings.getFloat("muffle_amount") * 100, sliderGap - 4, 5,
                 "Hit Muffling", "", "%",
@@ -259,7 +265,11 @@ public class UIScreen extends Screen {
 
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 22,
+<<<<<<< HEAD
                 panelHeightCenter - rowStart + verticalGap * 18,
+=======
+                panelHeightCenter - rowStart + verticalGap * 17,
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
                 panelWidthCenter - column1Start,
                 sliderWidth - 49, 9, 25, Settings.getInt("metronome"), sliderGap - 7, 1,
                 "Metronome", "", "t",

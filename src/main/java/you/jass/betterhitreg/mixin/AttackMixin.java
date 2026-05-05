@@ -1,14 +1,20 @@
 package you.jass.betterhitreg.mixin;
 
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+<<<<<<< HEAD
 import net.minecraft.client.sound.PositionedSoundInstance;
+=======
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+<<<<<<< HEAD
 import net.minecraft.sound.SoundEvents;
+=======
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +22,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import you.jass.betterhitreg.hitreg.Hit;
 import you.jass.betterhitreg.hitreg.Hitreg;
+<<<<<<< HEAD
 import you.jass.betterhitreg.settings.Toggle;
+=======
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
 import you.jass.betterhitreg.utility.MultiVersion;
 
 import static you.jass.betterhitreg.hitreg.Hitreg.*;
@@ -54,12 +63,15 @@ public abstract class AttackMixin {
         hit.wasHitByAnother = target.timeUntilRegen > 10 && sinceLastHit >= 1000;
         hit.wasInvisible = target.isInvisible();
 
+<<<<<<< HEAD
         updateFightState();
 
         if (Toggle.PING_ON_HIT.toggled() && Hitreg.distance >= 3) {
             client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f));
         }
 
+=======
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
         if (!hitEarly) {
             if (!fighting) fightStartedAt = System.currentTimeMillis();
             fighting = true;
@@ -74,7 +86,10 @@ public abstract class AttackMixin {
             alreadyAnimated = false;
             alreadyKnockedBack = false;
             updateFightState();
+<<<<<<< HEAD
             hit.distance = Hitreg.distance;
+=======
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
         }
 
         hit.load();

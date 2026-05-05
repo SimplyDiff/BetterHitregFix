@@ -52,7 +52,10 @@ public class Render {
         boolean isHitbox = Toggle.RENDER_HITBOX.toggled();
         boolean isCross = Toggle.RENDER_CROSS.toggled();
         boolean isRing = Toggle.RENDER_RING.toggled();
+<<<<<<< HEAD
 
+=======
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
         if (client.player == null) return;
         if (!isHitbox && !isCross && !isRing) return;
 
@@ -61,6 +64,7 @@ public class Render {
             return;
         }
 
+<<<<<<< HEAD
         // =========================
         // DISTANCE (RANGE CHECK)
         // =========================
@@ -107,6 +111,22 @@ public class Render {
         // =========================
         // RING
         // =========================
+=======
+        Vec3d closest = getClosestPoint(client.player, target);
+        double distance = client.player.getEyePos().squaredDistanceTo(closest);
+        boolean inRange = distance <= 9;
+
+        if (isHitbox) {
+            int color = inRange ? NEAR_HITBOX : FAR_HITBOX;
+            box(camera, getBoundingBox(target), 3, color);
+        }
+
+        if (isCross && distance <= 100) {
+            int color = isHitbox ? (inRange ? NEAR_CROSS_WITH_HITBOX : FAR_CROSS_WITH_HITBOX) : (inRange ? NEAR_CROSS : FAR_CROSS);
+            cross(camera, closest, 3, 30, 0.005, color);
+        }
+
+>>>>>>> e33f8c601fc6870e7201befb111ca8d225c89255
         if (isRing) {
             int color = inRange ? NEAR_RING : FAR_RING;
             ring(camera, 3, 64, 3, color);
