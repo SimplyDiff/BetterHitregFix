@@ -48,7 +48,7 @@ public class PacketProcessor {
                 lastAnimation = dealtDamageTimestamp;
                 alreadyAnimated = true;
                 long delay = dealtDamageTimestamp - lastAttack;
-                if (Toggle.ALERT_DELAYS.toggled() && !hasBeenAnimated && delay <= 500) message("hitreg §7was §f" + delay + "§7ms", "/hitreg alertDelays");
+                if (Toggle.ALERT_DELAYS.toggled() && !hasBeenAnimated && delay <= 500) message("hitreg was " + delay + "ms", "/hitreg alertDelays");
                 if (delay <= 500) last100Regs.addDelay((int) delay);
                 if (!isToggled && withinFight && Toggle.PARTICLES_EVERY_HIT.toggled()) playParticles("ENCHANTED_HIT", target);
                 processDelayedSounds(true);
@@ -60,14 +60,6 @@ public class PacketProcessor {
 
                 lastAttacked = tookDamageTimestamp;
                 processDelayedSounds(false);
-
-                // jump reset detection: jump must have happened within 400ms of the hit (generous to account for network delay)
-                if (Toggle.JUMP_RESET_PING.toggled()
-                        && client.player != null
-                        && Hitreg.wasMovingForward
-                        && Math.abs(tookDamageTimestamp - Hitreg.lastJumpTimestamp) <= 400) {
-                    PingSound.play();
-                }
             }
         }
 

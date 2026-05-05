@@ -10,6 +10,7 @@
     "DamageMixin",
     "EntityAccessor",
     "NetworkMixin",
+    "LivingEntityMixin",
     "ParticleMixin",
     "PlayerMixin",
     "RenderMixin",
