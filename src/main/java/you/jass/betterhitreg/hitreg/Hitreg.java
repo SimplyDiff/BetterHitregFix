@@ -50,6 +50,7 @@ public class Hitreg {
     public static double distance;
     public static int playerId;
     public static long lastJumpTimestamp;
+    public static boolean wasOnGround;
     public static int shouldMuffle;
     public static int fightsThisSession;
     public static float muffleAmount;
@@ -83,6 +84,12 @@ public class Hitreg {
         boolean movingForward = client.options.forwardKey.isPressed();
         if (movingForward && !wasMovingForward) sprintIsReset = true;
         wasMovingForward = movingForward;
+
+        boolean onGround = client.player.isOnGround();
+        if (!onGround && wasOnGround && client.player.getVelocity().getY() > 0) {
+            lastJumpTimestamp = System.currentTimeMillis();
+        }
+        wasOnGround = onGround;
 
         //if the fight ended, clear all expected hits to prevent any false ghosts, else remove all unneeded hits naturally
         if (!withinFight) {

@@ -22,9 +22,4 @@ public abstract class PlayerMixin {
     private void addEnchantedHitParticles(Entity target, CallbackInfo ci) {
         if (Hitreg.isToggled()) ci.cancel();
     }
-
-    @Inject(method = "jump", at = @At("HEAD"))
-    private void onJump(CallbackInfo ci) {
-        Hitreg.lastJumpTimestamp = System.currentTimeMillis();
-    }
 }
