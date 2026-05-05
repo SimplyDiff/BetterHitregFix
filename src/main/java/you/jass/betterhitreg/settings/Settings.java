@@ -27,6 +27,8 @@ public class Settings {
         categories.put("hitreg", "configure");
         categories.put("muffle_amount", "configure");
         categories.put("metronome", "configure");
+        categories.put("ping_sound", "configure");
+        categories.put("ping_volume", "configure");
 
         categories.put("cross_opacity", "render");
         categories.put("hitbox_opacity", "render");
@@ -54,6 +56,8 @@ public class Settings {
         defaults.setProperty("hitreg", "0");
         defaults.setProperty("tutorial", "true");
         defaults.setProperty("muffle_amount", "0");
+        defaults.setProperty("ping_sound", "1");
+        defaults.setProperty("ping_volume", "80");
 
         defaults.setProperty("total_fights", "0");
         defaults.setProperty("fight_playtime_(seconds)", "0");

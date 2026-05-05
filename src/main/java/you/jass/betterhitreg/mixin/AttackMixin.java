@@ -1,14 +1,12 @@
 package you.jass.betterhitreg.mixin;
 
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.sound.SoundEvents;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,6 +16,7 @@ import you.jass.betterhitreg.hitreg.Hit;
 import you.jass.betterhitreg.hitreg.Hitreg;
 import you.jass.betterhitreg.settings.Toggle;
 import you.jass.betterhitreg.utility.MultiVersion;
+import you.jass.betterhitreg.utility.PingSound;
 
 import static you.jass.betterhitreg.hitreg.Hitreg.*;
 
@@ -57,7 +56,7 @@ public abstract class AttackMixin {
         updateFightState();
 
         if (Toggle.PING_ON_HIT.toggled() && Hitreg.distance >= 3) {
-            client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f));
+            PingSound.play();
         }
 
         if (!hitEarly) {
