@@ -45,13 +45,13 @@ public class UIScreen extends Screen {
         int panelWidthCenter = width / 2;
         int panelHeightCenter = height / 2;
         int panelWidth  = 350;
-        int panelHeight = 250;
+        int panelHeight = 330;
         int halfPanelWidth  = panelWidth / 2;
         int halfPanelHeight = panelHeight / 2;
         int column1Start = 160;
         int column2Start = -5;
         int horizontalGap = 145;
-        int rowStart = 125;
+        int rowStart = 165;
         int sliderWidth = 135;
         int sliderStart = 128;
         int sliderGap = 18;
@@ -81,7 +81,7 @@ public class UIScreen extends Screen {
         widgets.add(new UILabel(
                 panelWidthCenter,
                 panelHeightCenter + halfPanelHeight - 10,
-                textRenderer, "Made by Jass â€¢ Modrinth.com/mod/betterhitreg â€¢ " + MultiVersion.getVersion(),
+                textRenderer, "Made by Jass \u2022 Modrinth.com/mod/betterhitreg \u2022 " + MultiVersion.getVersion(),
                 footer, true, true
         ));
 
@@ -95,7 +95,7 @@ public class UIScreen extends Screen {
                 v -> {},
                 v -> {
                     Settings.setInt("hitreg", v);
-                    message("hitreg Â§7set to Â§f" + v + "Â§7ms", "/hitreg set 0");
+                    message("hitreg §7set to §f" + v + "§7ms", "/hitreg set 0");
                 }
         ));
 
@@ -285,8 +285,8 @@ public class UIScreen extends Screen {
                 v -> {},
                 v -> {
                     Settings.setFloat("muffle_amount", v / 100f);
-                    if (v < 10) message("hitsound muffling Â§cdisabled", "/hitreg metronome");
-                    else message("hitsound muffling Â§7set to Â§f" + v + "Â§7%", "/hitreg metronome " + v);
+                    if (v < 10) message("hitsound muffling §cdisabled", "/hitreg metronome");
+                    else message("hitsound muffling §7set to §f" + v + "§7%", "/hitreg metronome " + v);
                 }
         ));
 
@@ -301,10 +301,10 @@ public class UIScreen extends Screen {
                 v -> {
                     if (v < 10) {
                         Settings.set("metronome", "0");
-                        message("metronome Â§cdisabled", "/hitreg metronome");
+                        message("metronome §cdisabled", "/hitreg metronome");
                     } else {
                         Settings.setInt("metronome", v);
-                        message("metronome Â§7set to Â§f" + v + " Â§7ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
+                        message("metronome §7set to §f" + v + " §7ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
                     }
                 }
         ));

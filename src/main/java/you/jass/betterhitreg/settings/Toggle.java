@@ -56,12 +56,12 @@ public enum Toggle {
     public boolean toggle() {
         boolean value = Settings.toggle(key);
         String command = "/hitreg " + key;
-        MultiVersion.message(label + " Â§7is now " + (value ? "Â§aonÂ§7" : "Â§coffÂ§7"), command);
+        MultiVersion.message(label + " §7is now " + (value ? "§aon§7" : "§coff§7"), command);
 
         switch (this) {
-            case SAFE_REGS_ONLY -> MultiVersion.message("Â§7first hits " + (value ? "will no longer" : "will now") + " use custom hitreg", command);
-            case IGNORE_SHIELD_HOLDERS -> MultiVersion.message("Â§7players with a shield (blocking or not) " + (value ? "will no longer" : "will now") + " be affected by custom hitreg", command);
-            case RENDER_HITBOX, RENDER_CROSS, RENDER_RING -> MultiVersion.message("Â§7colors can be edited via Â§fconfigs/Hitreg.properties Â§7in your minecraft instance folder", command);
+            case SAFE_REGS_ONLY -> MultiVersion.message("§7first hits " + (value ? "will no longer" : "will now") + " use custom hitreg", command);
+            case IGNORE_SHIELD_HOLDERS -> MultiVersion.message("§7players with a shield (blocking or not) " + (value ? "will no longer" : "will now") + " be affected by custom hitreg", command);
+            case RENDER_HITBOX, RENDER_CROSS, RENDER_RING -> MultiVersion.message("§7colors can be edited via §fconfigs/Hitreg.properties §7in your minecraft instance folder", command);
         }
 
         return value;
