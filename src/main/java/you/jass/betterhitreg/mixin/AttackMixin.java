@@ -1,4 +1,4 @@
-﻿package you.jass.betterhitreg.mixin;
+package you.jass.betterhitreg.mixin;
 
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.sound.PositionedSoundInstance;

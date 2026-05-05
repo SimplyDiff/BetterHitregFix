@@ -1,4 +1,4 @@
-﻿package you.jass.betterhitreg.settings;
+package you.jass.betterhitreg.settings;
 
 import you.jass.betterhitreg.utility.MultiVersion;
 
@@ -24,7 +24,8 @@ public enum Toggle {
     RENDER_HITBOX("renderHitbox", "render target hitbox", false),
     RENDER_CROSS("renderCross", "render target cross", false),
     RENDER_RING("renderRing", "render reach ring", false),
-    PING_ON_HIT("pingOnHit", "ping on hit", false);
+    PING_ON_HIT("pingOnHit", "ping on hit", false),
+    JUMP_RESET_PING("jumpResetPing", "jump reset ping", false);
 
     private final String key;
     private final String label;

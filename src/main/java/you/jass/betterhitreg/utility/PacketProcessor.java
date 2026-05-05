@@ -1,11 +1,13 @@
 package you.jass.betterhitreg.utility;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityDamageS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import you.jass.betterhitreg.hitreg.Hitreg;
 import you.jass.betterhitreg.settings.Toggle;
 
@@ -60,6 +62,15 @@ public class PacketProcessor {
 
                 lastAttacked = tookDamageTimestamp;
                 processDelayedSounds(false);
+
+                // jump reset detection: player was hit while jumping (not on ground) and moving forward
+                if (Toggle.JUMP_RESET_PING.toggled()
+                        && client.player != null
+                        && !client.player.isOnGround()
+                        && client.player.getVelocity().getY() > 0
+                        && client.options.forwardKey.isPressed()) {
+                    client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 2.0f));
+                }
             }
         }
 

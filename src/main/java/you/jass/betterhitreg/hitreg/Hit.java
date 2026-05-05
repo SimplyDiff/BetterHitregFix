@@ -1,4 +1,4 @@
-﻿package you.jass.betterhitreg.hitreg;
+package you.jass.betterhitreg.hitreg;
 
 import static you.jass.betterhitreg.hitreg.Hitreg.*;
 import static you.jass.betterhitreg.hitreg.Hitreg.alreadyAnimated;

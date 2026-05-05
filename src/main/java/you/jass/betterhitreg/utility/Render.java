@@ -1,4 +1,4 @@
-﻿package you.jass.betterhitreg.utility;
+package you.jass.betterhitreg.utility;
 
 //version 1.21.11
 import net.minecraft.world.debug.gizmo.GizmoDrawing;

@@ -1,4 +1,4 @@
-﻿package you.jass.betterhitreg.ui;
+package you.jass.betterhitreg.ui;
 
 //version 1.19.4
 //import net.minecraft.client.util.math.MatrixStack;
@@ -242,9 +242,19 @@ public class UIScreen extends Screen {
                 checked -> Toggle.PING_ON_HIT.toggle()
         ));
 
+        widgets.add(new UICheckbox(
+                panelWidthCenter - column1Start,
+                panelHeightCenter - rowStart + verticalGap * 17,
+                10, horizontalGap,
+                textRenderer, "Jump Reset Ping",
+                checkbox, true,
+                Toggle.JUMP_RESET_PING.toggled(),
+                checked -> Toggle.JUMP_RESET_PING.toggle()
+        ));
+
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 25,
-                panelHeightCenter - rowStart + verticalGap * 17,
+                panelHeightCenter - rowStart + verticalGap * 18,
                 panelWidthCenter - column1Start,
                 sliderWidth - 55, 0, 100, Settings.getFloat("muffle_amount") * 100, sliderGap - 4, 5,
                 "Hit Muffling", "", "%",
@@ -259,7 +269,7 @@ public class UIScreen extends Screen {
 
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 22,
-                panelHeightCenter - rowStart + verticalGap * 18,
+                panelHeightCenter - rowStart + verticalGap * 19,
                 panelWidthCenter - column1Start,
                 sliderWidth - 49, 9, 25, Settings.getInt("metronome"), sliderGap - 7, 1,
                 "Metronome", "", "t",
