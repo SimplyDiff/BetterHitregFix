@@ -61,11 +61,11 @@ public class PacketProcessor {
                 lastAttacked = tookDamageTimestamp;
                 processDelayedSounds(false);
 
-                // jump reset detection: jump must have happened within 200ms of the hit
+                // jump reset detection: jump must have happened within 400ms of the hit (generous to account for network delay)
                 if (Toggle.JUMP_RESET_PING.toggled()
                         && client.player != null
                         && Hitreg.wasMovingForward
-                        && Math.abs(tookDamageTimestamp - Hitreg.lastJumpTimestamp) <= 200) {
+                        && Math.abs(tookDamageTimestamp - Hitreg.lastJumpTimestamp) <= 400) {
                     PingSound.play();
                 }
             }
