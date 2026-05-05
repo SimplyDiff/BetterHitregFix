@@ -45,7 +45,7 @@ public class UIScreen extends Screen {
         int panelWidthCenter = width / 2;
         int panelHeightCenter = height / 2;
         int panelWidth  = 350;
-        int panelHeight = 330;
+        int panelHeight = 360;
         int halfPanelWidth  = panelWidth / 2;
         int halfPanelHeight = panelHeight / 2;
         int column1Start = 160;
@@ -258,7 +258,7 @@ public class UIScreen extends Screen {
                 panelHeightCenter - rowStart + verticalGap * 18,
                 panelWidthCenter - column1Start,
                 sliderWidth - 55, 1, 100, Settings.getInt("ping_volume"), sliderGap - 4, 5,
-                "Ping Volume", "", "%",
+                "Hit Ping Volume", "", "%",
                 textRenderer, slider, true, false,
                 v -> {},
                 v -> { Settings.setInt("ping_volume", v); PingSound.play(); }
@@ -269,7 +269,7 @@ public class UIScreen extends Screen {
                 panelHeightCenter - rowStart + verticalGap * 19,
                 panelWidthCenter - column1Start,
                 sliderWidth - 55, 1, 5, Settings.getInt("ping_sound"), sliderGap - 4, 1,
-                "Ping Sound (" + PingSound.getName(Settings.getInt("ping_sound")) + ")", "", "",
+                "Hit Ping Sound (" + PingSound.getName(Settings.getInt("ping_sound")) + ")", "", "",
                 textRenderer, slider, false, false,
                 v -> {},
                 v -> { Settings.setInt("ping_sound", v); PingSound.play(); init(); }
@@ -278,6 +278,28 @@ public class UIScreen extends Screen {
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 25,
                 panelHeightCenter - rowStart + verticalGap * 20,
+                panelWidthCenter - column1Start,
+                sliderWidth - 55, 1, 100, Settings.getInt("jr_ping_volume"), sliderGap - 4, 5,
+                "JR Ping Volume", "", "%",
+                textRenderer, slider, true, false,
+                v -> {},
+                v -> { Settings.setInt("jr_ping_volume", v); PingSound.playJumpReset(); }
+        ));
+
+        widgets.add(new UISlider(
+                panelWidthCenter - sliderStart + 25,
+                panelHeightCenter - rowStart + verticalGap * 21,
+                panelWidthCenter - column1Start,
+                sliderWidth - 55, 1, 5, Settings.getInt("jr_ping_sound"), sliderGap - 4, 1,
+                "JR Ping Sound (" + PingSound.getName(Settings.getInt("jr_ping_sound")) + ")", "", "",
+                textRenderer, slider, false, false,
+                v -> {},
+                v -> { Settings.setInt("jr_ping_sound", v); PingSound.playJumpReset(); init(); }
+        ));
+
+        widgets.add(new UISlider(
+                panelWidthCenter - sliderStart + 25,
+                panelHeightCenter - rowStart + verticalGap * 22,
                 panelWidthCenter - column1Start,
                 sliderWidth - 55, 0, 100, Settings.getFloat("muffle_amount") * 100, sliderGap - 4, 5,
                 "Hit Muffling", "", "%",
@@ -292,7 +314,7 @@ public class UIScreen extends Screen {
 
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 22,
-                panelHeightCenter - rowStart + verticalGap * 21,
+                panelHeightCenter - rowStart + verticalGap * 23,
                 panelWidthCenter - column1Start,
                 sliderWidth - 49, 9, 25, Settings.getInt("metronome"), sliderGap - 7, 1,
                 "Metronome", "", "t",
@@ -304,7 +326,7 @@ public class UIScreen extends Screen {
                         message("metronome §cdisabled", "/hitreg metronome");
                     } else {
                         Settings.setInt("metronome", v);
-                        message("metronome §7set to §f" + v + " §7ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
+                        message("metronome set to " + v + " ticks (" + (v * 50) + "ms)", "/hitreg metronome " + v);
                     }
                 }
         ));

@@ -15,11 +15,19 @@ public class PingSound {
     }
 
     public static void play() {
+        playWith("ping_sound", "ping_volume");
+    }
+
+    public static void playJumpReset() {
+        playWith("jr_ping_sound", "jr_ping_volume");
+    }
+
+    public static void playWith(String soundKey, String volumeKey) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client == null || client.getSoundManager() == null) return;
 
-        int soundIndex = Settings.getInt("ping_sound");
-        float volume = Settings.getInt("ping_volume") / 100f;
+        int soundIndex = Settings.getInt(soundKey);
+        float volume = Settings.getInt(volumeKey) / 100f;
 
         if (soundIndex == 2)      client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.BLOCK_NOTE_BLOCK_PLING, volume));
         else if (soundIndex == 3) client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.BLOCK_NOTE_BLOCK_BELL, volume));

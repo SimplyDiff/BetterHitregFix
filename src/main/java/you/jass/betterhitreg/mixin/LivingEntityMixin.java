@@ -27,7 +27,7 @@ public class LivingEntityMixin {
                     && Hitreg.wasMovingForward
                     && Hitreg.wasOnGroundWhenHit
                     && ticksSinceHit >= 0 && ticksSinceHit <= 8) {
-                PingSound.play();
+                PingSound.playJumpReset();
             }
         }
     }
