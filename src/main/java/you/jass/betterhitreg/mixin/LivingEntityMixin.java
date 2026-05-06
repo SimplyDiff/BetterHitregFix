@@ -1,6 +1,7 @@
 package you.jass.betterhitreg.mixin;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import you.jass.betterhitreg.hitreg.Hitreg;
 import you.jass.betterhitreg.settings.Settings;
 import you.jass.betterhitreg.settings.Toggle;
+import you.jass.betterhitreg.utility.PacketProcessor;
 import you.jass.betterhitreg.utility.PingSound;
 
 @Mixin(LivingEntity.class)
@@ -18,16 +20,27 @@ public class LivingEntityMixin {
     private void onJump(CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if ((Object) this == mc.player) {
-            int age = mc.player.age;
-            Hitreg.lastJumpAge = age;
-            // ping fires ON JUMP, only if:
-            // 1. player was recently hit (jumped AFTER the hit)
-            // 2. player was on the ground when they were hit (not mid-air, which causes false positives)
-            int ticksSinceHit = age - Hitreg.hurtAge;
-            if (Toggle.JUMP_RESET_PING.toggled()
-                    && Hitreg.wasMovingForward
-                    && Hitreg.wasOnGroundWhenHit
-                    && ticksSinceHit >= 0 && ticksSinceHit <= Settings.getInt("jr_window")) {
+            Hitreg.lastJumpAge = mc.player.age;
+
+            if (!Toggle.JUMP_RESET_PING.toggled()) return;
+            if (!Hitreg.wasMovingForward || !Hitreg.wasOnGroundWhenHit) return;
+
+            long jumpTime = System.currentTimeMillis();
+            long timeSinceHit = jumpTime - PacketProcessor.tookDamageTimestamp;
+            if (timeSinceHit < 0) return; // jumped before the hit packet arrived
+
+            // get one-way ping (ms): the jump packet takes this long to reach the server
+            int ping = 0;
+            if (mc.getNetworkHandler() != null) {
+                PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+                if (entry != null) ping = entry.getLatency();
+            }
+
+            // server sees: timeSinceHit + ping (your reaction + travel time of your jump packet)
+            long serverGap = timeSinceHit + ping;
+            long windowMs = Settings.getInt("jr_window") * 50L;
+
+            if (serverGap <= windowMs) {
                 PingSound.playJumpReset();
             }
         }
