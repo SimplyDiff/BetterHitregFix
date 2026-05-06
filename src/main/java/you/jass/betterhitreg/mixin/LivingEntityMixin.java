@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import you.jass.betterhitreg.hitreg.Hitreg;
+import you.jass.betterhitreg.settings.Settings;
 import you.jass.betterhitreg.settings.Toggle;
 import you.jass.betterhitreg.utility.PingSound;
 
@@ -26,7 +27,7 @@ public class LivingEntityMixin {
             if (Toggle.JUMP_RESET_PING.toggled()
                     && Hitreg.wasMovingForward
                     && Hitreg.wasOnGroundWhenHit
-                    && ticksSinceHit >= 0 && ticksSinceHit <= 8) {
+                    && ticksSinceHit >= 0 && ticksSinceHit <= Settings.getInt("jr_window")) {
                 PingSound.playJumpReset();
             }
         }

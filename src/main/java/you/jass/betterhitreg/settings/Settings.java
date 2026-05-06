@@ -31,6 +31,7 @@ public class Settings {
         categories.put("ping_volume", "configure");
         categories.put("jr_ping_sound", "configure");
         categories.put("jr_ping_volume", "configure");
+        categories.put("jr_window", "configure");
 
         categories.put("cross_opacity", "render");
         categories.put("hitbox_opacity", "render");
@@ -62,6 +63,7 @@ public class Settings {
         defaults.setProperty("ping_volume", "80");
         defaults.setProperty("jr_ping_sound", "3");
         defaults.setProperty("jr_ping_volume", "80");
+        defaults.setProperty("jr_window", "8");
 
         defaults.setProperty("total_fights", "0");
         defaults.setProperty("fight_playtime_(seconds)", "0");

@@ -45,7 +45,7 @@ public class UIScreen extends Screen {
         int panelWidthCenter = width / 2;
         int panelHeightCenter = height / 2;
         int panelWidth  = 350;
-        int panelHeight = 360;
+        int panelHeight = 375;
         int halfPanelWidth  = panelWidth / 2;
         int halfPanelHeight = panelHeight / 2;
         int column1Start = 160;
@@ -301,6 +301,17 @@ public class UIScreen extends Screen {
                 panelWidthCenter - sliderStart + 25,
                 panelHeightCenter - rowStart + verticalGap * 22,
                 panelWidthCenter - column1Start,
+                sliderWidth - 55, 1, 20, Settings.getInt("jr_window"), sliderGap - 4, 1,
+                "JR Window", "", "t",
+                textRenderer, slider, false, false,
+                v -> {},
+                v -> Settings.setInt("jr_window", v)
+        ));
+
+        widgets.add(new UISlider(
+                panelWidthCenter - sliderStart + 25,
+                panelHeightCenter - rowStart + verticalGap * 23,
+                panelWidthCenter - column1Start,
                 sliderWidth - 55, 0, 100, Settings.getFloat("muffle_amount") * 100, sliderGap - 4, 5,
                 "Hit Muffling", "", "%",
                 textRenderer, slider, true, true,
@@ -314,7 +325,7 @@ public class UIScreen extends Screen {
 
         widgets.add(new UISlider(
                 panelWidthCenter - sliderStart + 22,
-                panelHeightCenter - rowStart + verticalGap * 23,
+                panelHeightCenter - rowStart + verticalGap * 24,
                 panelWidthCenter - column1Start,
                 sliderWidth - 49, 9, 25, Settings.getInt("metronome"), sliderGap - 7, 1,
                 "Metronome", "", "t",
