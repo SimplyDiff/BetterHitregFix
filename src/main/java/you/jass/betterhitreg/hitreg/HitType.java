@@ -82,7 +82,7 @@ public enum HitType {
     }
     
     public static SoundEvent getHurtSound() {
-        if (Hitreg.target == null) return SoundEvents.ENTITY_PLAYER_HURT;
-        return ((EntityAccessor) Hitreg.target).getHurtSound(Hitreg.target.getDamageSources().generic());
+        if (Hitreg.targets.target == null) return SoundEvents.ENTITY_PLAYER_HURT;
+        return ((EntityAccessor) Hitreg.targets.target).getHurtSound(Hitreg.targets.target.getDamageSources().generic());
     }
 }

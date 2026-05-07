@@ -3,9 +3,6 @@ package you.jass.betterhitreg.hitreg;
 import static you.jass.betterhitreg.hitreg.Hitreg.*;
 import static you.jass.betterhitreg.hitreg.Hitreg.alreadyAnimated;
 import static you.jass.betterhitreg.hitreg.Hitreg.alreadyKnockedBack;
-import static you.jass.betterhitreg.hitreg.Hitreg.lastTarget;
-import static you.jass.betterhitreg.hitreg.Hitreg.newTarget;
-import static you.jass.betterhitreg.hitreg.Hitreg.sprintIsReset;
 import static you.jass.betterhitreg.utility.MultiVersion.*;
 
 import java.util.ArrayList;

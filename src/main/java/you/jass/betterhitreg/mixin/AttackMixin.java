@@ -25,7 +25,7 @@ public abstract class AttackMixin {
     @Inject(method = "attackEntity", at = @At("HEAD"))
     private static void attack(PlayerEntity player, Entity target, CallbackInfo ci) {
         if (client.player == null || !(target instanceof LivingEntity) || target instanceof ArmorStandEntity || !target.isAlive() || target.isInvulnerable()) return;
-        Hitreg.target = (LivingEntity) target;
+        Hitreg.targets.target = (LivingEntity) target;
 
         //hitting before 500ms is too fast to deal damage, lower it by half a tick (25ms) because it's not exact and can be lower
         long sinceLastHit = System.currentTimeMillis() - lastAttack;
@@ -33,7 +33,7 @@ public abstract class AttackMixin {
 
         //load the hit, this is where our custom hit animation & sound prepares to play
         Hit hit = new Hit();
-        hit.target = Hitreg.target;
+        hit.target = Hitreg.targets.target;
         hit.cooldown = client.player.getAttackCooldownProgress(0.5f);
         hit.tooEarlyForDamage = hitEarly;
         hit.tooEarlyForSpecial = hit.cooldown <= 0.9f;
@@ -48,8 +48,8 @@ public abstract class AttackMixin {
         hit.wasBlind = client.player.hasStatusEffect(StatusEffects.BLINDNESS);
         hit.wasHoldingSword = client.player.getMainHandStack().getItem().getName().getString().toLowerCase().contains("sword");
         hit.swordHadSharpness = MultiVersion.hasSharpness();
-        hit.sprintWasReset = sprintIsReset;
-        hit.wasNewTarget = lastTarget != target.getId();
+        hit.sprintWasReset = Hitreg.fight.sprintIsReset;
+        hit.wasNewTarget = Hitreg.targets.lastTarget != target.getId();
         hit.wasHitByAnother = target.timeUntilRegen > 10 && sinceLastHit >= 1000;
         hit.wasInvisible = target.isInvisible();
 
@@ -60,16 +60,16 @@ public abstract class AttackMixin {
         }
 
         if (!hitEarly) {
-            if (!fighting) fightStartedAt = System.currentTimeMillis();
-            fighting = true;
-            hitByAnother = hit.wasHitByAnother;
-            newTarget = hit.wasNewTarget;
-            targetHasShield = Hitreg.target.isHolding(Items.SHIELD);
-            targetIsBlocking = targetHasShield && Hitreg.target.isUsingItem();
+            if (!Hitreg.fight.fighting) Hitreg.fight.fightStartedAt = System.currentTimeMillis();
+            Hitreg.fight.fighting = true;
+            Hitreg.fight.hitByAnother = hit.wasHitByAnother;
+            Hitreg.fight.newTarget = hit.wasNewTarget;
+            targetHasShield = Hitreg.targets.target.isHolding(Items.SHIELD);
+            targetIsBlocking = targetHasShield && Hitreg.targets.target.isUsingItem();
             lastAttackLocation = MultiVersion.getBasePosition(client.player);
             lastAttack = System.currentTimeMillis();
-            lastTarget = target.getId();
-            sprintIsReset = false;
+            Hitreg.targets.lastTarget = target.getId();
+            Hitreg.fight.sprintIsReset = false;
             alreadyAnimated = false;
             alreadyKnockedBack = false;
             updateFightState();

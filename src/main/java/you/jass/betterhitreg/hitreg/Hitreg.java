@@ -3,7 +3,6 @@ package you.jass.betterhitreg.hitreg;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -22,43 +21,30 @@ import static you.jass.betterhitreg.utility.MultiVersion.message;
 
 public class Hitreg {
     public static MinecraftClient client;
-    public static int lastTarget;
-    public static LivingEntity target;
     public static int tick;
     public static long lastAttack;
     public static long lastAttacked;
     public static long lastAnimation;
     public static boolean alreadyAnimated;
     public static boolean alreadyKnockedBack;
-    public static boolean wasMovingForward;
-    public static boolean sprintIsReset = true;
-    public static boolean fighting = false;
-    public static boolean wasGhosted;
-    public static boolean newTarget = true;
-    public static boolean hitByAnother;
     public static boolean targetHasShield;
     public static boolean targetIsBlocking;
-    public static RegQueue last100Regs = new RegQueue(100);
     public static Vec3d lastAttackLocation = Vec3d.ZERO;
     public static Vec3d targetLocation = Vec3d.ZERO;
     public static Vec3d previousTargetLocation = Vec3d.ZERO;
-    public static long fightStartedAt;
     public static double ground;
     public static boolean bothAlive;
     public static boolean withinFight;
     public static boolean targetInvisible;
     public static double distance;
     public static int playerId;
-    public static long lastJumpTimestamp;
-    public static boolean wasOnGround;
-    public static int lastJumpAge;
-    public static int hurtAge;
-    public static boolean wasOnGroundWhenHit;
     public static int shouldMuffle;
-    public static int fightsThisSession;
     public static float muffleAmount;
-    public static long lastNonGhost;
     public static boolean tutorialAlreadySeen;
+
+    public static JumpResetState jumpReset = new JumpResetState();
+    public static TargetState targets = new TargetState();
+    public static FightState fight = new FightState();
 
 
     public static void tick() {
@@ -85,26 +71,26 @@ public class Hitreg {
         updateGround();
 
         boolean movingForward = client.options.forwardKey.isPressed();
-        if (movingForward && !wasMovingForward) sprintIsReset = true;
-        wasMovingForward = movingForward;
+        if (movingForward && !fight.wasMovingForward) fight.sprintIsReset = true;
+        fight.wasMovingForward = movingForward;
 
         boolean onGround = client.player.isOnGround();
-        wasOnGround = onGround;
+        jumpReset.wasOnGround = onGround;
 
         //if the fight ended, clear all expected hits to prevent any false ghosts, else remove all unneeded hits naturally
         if (!withinFight) {
-            if (fighting) {
-                long duration = (System.currentTimeMillis() - fightStartedAt) / 1_000;
+            if (fight.fighting) {
+                long duration = (System.currentTimeMillis() - fight.fightStartedAt) / 1_000;
 
                 //if the fight lasted at least 10 seconds, at most 10 minutes, and you hit at least once, track it
-                if (duration >= 10 && duration <= 600 && lastNonGhost >= fightStartedAt) {
-                    fightsThisSession++;
+                if (duration >= 10 && duration <= 600 && fight.lastNonGhost >= fight.fightStartedAt) {
+                    fight.fightsThisSession++;
                     Settings.addFight(duration);
-                    if (Toggle.ALERT_FIGHTS.toggled()) message("fight §7took §f" + formatTime(duration) + " §7(#" + fightsThisSession + "/#" + Settings.getInt("total_fights") + ")", "/hitreg alertDelays");
+                    if (Toggle.ALERT_FIGHTS.toggled()) message("fight §7took §f" + formatTime(duration) + " §7(#" + fight.fightsThisSession + "/#" + Settings.getInt("total_fights") + ")", "/hitreg alertDelays");
                 }
             }
 
-            fighting = false;
+            fight.fighting = false;
             targetLocation = Vec3d.ZERO;
             previousTargetLocation = Vec3d.ZERO;
             HitTracker.clear();
@@ -120,10 +106,10 @@ public class Hitreg {
             alreadyKnockedBack = true;
         }
 
-        if (target != null) {
-            targetInvisible = target.isInvisible() || target.isSpectator();
+        if (targets.target != null) {
+            targetInvisible = targets.target.isInvisible() || targets.target.isSpectator();
             previousTargetLocation = targetLocation;
-            targetLocation = MultiVersion.getBasePosition(target);
+            targetLocation = MultiVersion.getBasePosition(targets.target);
         }
 
         if (Settings.isTutorial() && !tutorialAlreadySeen) {
@@ -183,22 +169,22 @@ public class Hitreg {
     }
 
     public static int getTargetsPing() {
-        if (target == null) return 0;
-        return getPing(target.getUuid());
+        if (targets.target == null) return 0;
+        return getPing(targets.target.getUuid());
     }
 
     public static boolean isToggled() {
         if (!Toggle.TOGGLE.toggled()) return false;
         if (!withinFight || targetIsBlocking) return false;
-        if (Toggle.SAFE_REGS_ONLY.toggled() && (newTarget || wasGhosted || hitByAnother)) return false;
+        if (Toggle.SAFE_REGS_ONLY.toggled() && (fight.newTarget || fight.wasGhosted || fight.hitByAnother)) return false;
         if (Toggle.IGNORE_SHIELD_HOLDERS.toggled() && targetHasShield) return false;
         return true;
     }
 
     public static void updateFightState() {
-        bothAlive = client.player != null && target != null && client.player.isAlive() && target.isAlive() && !client.player.isSpectator() && !target.isSpectator();
-        targetHasShield = target != null && Hitreg.target.isHolding(Items.SHIELD);
-        targetIsBlocking = targetHasShield && Hitreg.target.isUsingItem();
+        bothAlive = client.player != null && targets.target != null && client.player.isAlive() && targets.target.isAlive() && !client.player.isSpectator() && !targets.target.isSpectator();
+        targetHasShield = targets.target != null && targets.target.isHolding(Items.SHIELD);
+        targetIsBlocking = targetHasShield && targets.target.isUsingItem();
 
         if (bothAlive) {
             distance = distanceToTarget();
@@ -209,8 +195,8 @@ public class Hitreg {
     }
 
     public static double distanceToTarget() {
-        if (client.player == null || target == null) return Double.MAX_VALUE;
-        return distanceFrom(MultiVersion.getBasePosition(client.player), MultiVersion.getBasePosition(target));
+        if (client.player == null || targets.target == null) return Double.MAX_VALUE;
+        return distanceFrom(MultiVersion.getBasePosition(client.player), MultiVersion.getBasePosition(targets.target));
     }
 
     public static double distanceFromPlayer(Vec3d position) {
@@ -219,8 +205,8 @@ public class Hitreg {
     }
 
     public static double distanceFromTarget(Vec3d position) {
-        if (target == null) return Double.MAX_VALUE;
-        return distanceFrom(MultiVersion.getBasePosition(target), position);
+        if (targets.target == null) return Double.MAX_VALUE;
+        return distanceFrom(MultiVersion.getBasePosition(targets.target), position);
     }
 
     public static double distanceFrom(Vec3d a, Vec3d b) {

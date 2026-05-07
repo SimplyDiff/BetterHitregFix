@@ -140,7 +140,7 @@ public class UIScreen extends Screen {
                 panelWidthCenter - column1Start,
                 panelHeightCenter - rowStart + verticalGap * 6,
                 10, horizontalGap,
-                textRenderer, "Alert Delays (" + Hitreg.last100Regs.getAverageDelay() + "ms)",
+                textRenderer, "Alert Delays (" + Hitreg.fight.last100Regs.getAverageDelay() + "ms)",
                 checkbox, true,
                 Toggle.ALERT_DELAYS.toggled(),
                 checked -> Toggle.ALERT_DELAYS.toggle()
@@ -150,7 +150,7 @@ public class UIScreen extends Screen {
                 panelWidthCenter - column1Start,
                 panelHeightCenter - rowStart + verticalGap * 7,
                 10, horizontalGap,
-                textRenderer, "Alert Ghosts (" + Hitreg.last100Regs.getGhostRatio() + "%)",
+                textRenderer, "Alert Ghosts (" + Hitreg.fight.last100Regs.getGhostRatio() + "%)",
                 checkbox, true,
                 Toggle.ALERT_GHOSTS.toggled(),
                 checked -> Toggle.ALERT_GHOSTS.toggle()
@@ -160,7 +160,7 @@ public class UIScreen extends Screen {
                 panelWidthCenter - column1Start,
                 panelHeightCenter - rowStart + verticalGap * 8,
                 10, horizontalGap,
-                textRenderer, "Alert Misplaces (" + Hitreg.last100Regs.getInconsistencyRatio() + "%)",
+                textRenderer, "Alert Misplaces (" + Hitreg.fight.last100Regs.getInconsistencyRatio() + "%)",
                 checkbox, true,
                 Toggle.ALERT_INCONSISTENCIES.toggled(),
                 checked -> Toggle.ALERT_INCONSISTENCIES.toggle()

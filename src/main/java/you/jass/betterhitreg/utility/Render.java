@@ -63,7 +63,7 @@ public class Render {
         // =========================
         // DISTANCE (RANGE CHECK)
         // =========================
-        Vec3d closest = getClosestPoint(client.player, target);
+        Vec3d closest = getClosestPoint(client.player, Hitreg.targets.target);
         double distance = client.player.getEyePos().squaredDistanceTo(closest);
         boolean inRange = distance <= 9; // 3 blocks (squared)
 
@@ -76,7 +76,7 @@ public class Render {
         boolean isLookingAt = false;
 
         if (hit instanceof net.minecraft.util.hit.EntityHitResult ehr) {
-            isLookingAt = ehr.getEntity() == target;
+            isLookingAt = ehr.getEntity() == Hitreg.targets.target;
         }
 
         // =========================
@@ -89,7 +89,7 @@ public class Render {
         // =========================
         if (isHitbox) {
             int color = shouldBeRed ? NEAR_HITBOX : FAR_HITBOX;
-            box(camera, getBoundingBox(target), 3, color);
+            box(camera, getBoundingBox(Hitreg.targets.target), 3, color);
         }
 
         // =========================

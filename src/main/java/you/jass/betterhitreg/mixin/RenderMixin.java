@@ -28,7 +28,7 @@ public abstract class RenderMixin {
 
     @Unique
     private boolean shouldRender(Entity entity) {
-        if (!Toggle.HIDE_OTHER_FIGHTS.toggled() || client.player == null || entity.getId() == lastTarget || !Hitreg.withinFight || System.currentTimeMillis() - lastAttack > 5000) return true;
+        if (!Toggle.HIDE_OTHER_FIGHTS.toggled() || client.player == null || entity.getId() == Hitreg.targets.lastTarget || !Hitreg.withinFight || System.currentTimeMillis() - lastAttack > 5000) return true;
         Vec3d position = MultiVersion.getBasePosition(entity);
         return distanceFromPlayer(position) <= 5 || distanceFromTarget(position) <= 5 || distanceToTarget() > 10;
     }

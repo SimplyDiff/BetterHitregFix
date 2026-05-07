@@ -15,12 +15,9 @@ import java.util.*;
 import static you.jass.betterhitreg.hitreg.Hitreg.alreadyAnimated;
 import static you.jass.betterhitreg.hitreg.Hitreg.client;
 import static you.jass.betterhitreg.hitreg.Hitreg.isToggled;
-import static you.jass.betterhitreg.hitreg.Hitreg.last100Regs;
 import static you.jass.betterhitreg.hitreg.Hitreg.lastAnimation;
 import static you.jass.betterhitreg.hitreg.Hitreg.lastAttack;
 import static you.jass.betterhitreg.hitreg.Hitreg.lastAttacked;
-import static you.jass.betterhitreg.hitreg.Hitreg.lastTarget;
-import static you.jass.betterhitreg.hitreg.Hitreg.target;
 import static you.jass.betterhitreg.utility.MultiVersion.*;
 
 public class PacketProcessor {
@@ -30,14 +27,14 @@ public class PacketProcessor {
     public static boolean processDamage(EntityDamageS2CPacket packet) {
         //on network thread?
         if (!MinecraftClient.getInstance().isOnThread()) {
-            if (lastTarget == packet.entityId()) {
+            if (Hitreg.targets.lastTarget == packet.entityId()) {
                 dealtDamageTimestamp = System.currentTimeMillis();
             } else if (Hitreg.playerId == packet.entityId()) tookDamageTimestamp = System.currentTimeMillis();
         }
 
         //on main thread?
         else {
-            if (lastTarget == packet.entityId()) {
+            if (Hitreg.targets.lastTarget == packet.entityId()) {
                 //if processing never ran on the network thread, we need to update the timestamp here
                 if (System.currentTimeMillis() - dealtDamageTimestamp > 50) dealtDamageTimestamp = System.currentTimeMillis() - 2;
 
@@ -49,8 +46,8 @@ public class PacketProcessor {
                 alreadyAnimated = true;
                 long delay = dealtDamageTimestamp - lastAttack;
                 if (Toggle.ALERT_DELAYS.toggled() && !hasBeenAnimated && delay <= 500) message("hitreg was " + delay + "ms", "/hitreg alertDelays");
-                if (delay <= 500) last100Regs.addDelay((int) delay);
-                if (!isToggled && withinFight && Toggle.PARTICLES_EVERY_HIT.toggled()) playParticles("ENCHANTED_HIT", target);
+                if (delay <= 500) Hitreg.fight.last100Regs.addDelay((int) delay);
+                if (!isToggled && withinFight && Toggle.PARTICLES_EVERY_HIT.toggled()) playParticles("ENCHANTED_HIT", Hitreg.targets.target);
                 processDelayedSounds(true);
             }
 
@@ -67,7 +64,7 @@ public class PacketProcessor {
     }
 
     public static boolean processAnimation(EntityAnimationS2CPacket packet) {
-        if (lastTarget != getAnimationId(packet)) return true;
+        if (Hitreg.targets.lastTarget != getAnimationId(packet)) return true;
         boolean isToggled = isToggled();
         boolean withinFight = Hitreg.withinFight;
 

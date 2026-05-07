@@ -85,8 +85,8 @@ public class HitTracker {
             }
 
             //alert ghosts
-            if (!hit.wasNewTarget && !hit.wasHitByAnother && !hit.wasInvisible && !hit.wasBlocked && !Hitreg.wasGhosted) {
-                Hitreg.last100Regs.addGhost(!hit.wasAnimated);
+            if (!hit.wasNewTarget && !hit.wasHitByAnother && !hit.wasInvisible && !hit.wasBlocked && !Hitreg.fight.wasGhosted) {
+                Hitreg.fight.last100Regs.addGhost(!hit.wasAnimated);
                 if (Toggle.ALERT_GHOSTS.toggled() && !hit.wasAnimated) {
                     message("§7server §rghosted §7your §f" + hit.type.toString().toLowerCase() + " §7hit (cooldown: " + df.format(hit.cooldown) + ")", "/hitreg alertGhosts");
                     if (hit.hadShield) message("§7this may have been due to shield desync", "hitreg alertGhosts");
@@ -96,13 +96,13 @@ public class HitTracker {
 
             //alert inconsistencies
             if (hit.type == HitType.KNOCKBACK || hit.type == HitType.CRITICAL) {
-                Hitreg.last100Regs.addInconsistency(!hit.wasServerRight);
+                Hitreg.fight.last100Regs.addInconsistency(!hit.wasServerRight);
                 if (Toggle.ALERT_INCONSISTENCIES.toggled() && !hit.wasServerRight) message("§7server §rmisplaced §7your §f" + hit.type.toString().toLowerCase() + " §7hit (cooldown: " + df.format(hit.cooldown) + ")", "/hitreg alertInconsistencies");
             }
 
             //for safe regs
-            Hitreg.wasGhosted = !hit.wasAnimated;
-            if (hit.wasAnimated) Hitreg.lastNonGhost = hit.timestamp;
+            Hitreg.fight.wasGhosted = !hit.wasAnimated;
+            if (hit.wasAnimated) Hitreg.fight.lastNonGhost = hit.timestamp;
 
             //finished processing this hit, remove it
             hits.pollFirst();

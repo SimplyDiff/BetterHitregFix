@@ -20,10 +20,10 @@ public class LivingEntityMixin {
     private void onJump(CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if ((Object) this == mc.player) {
-            Hitreg.lastJumpAge = mc.player.age;
+            Hitreg.jumpReset.lastJumpAge = mc.player.age;
 
             if (!Toggle.JUMP_RESET_PING.toggled()) return;
-            if (!Hitreg.wasMovingForward || !Hitreg.wasOnGroundWhenHit) return;
+            if (!Hitreg.fight.wasMovingForward || !Hitreg.jumpReset.wasOnGroundWhenHit) return;
 
             long jumpTime = System.currentTimeMillis();
             long timeSinceHit = jumpTime - PacketProcessor.tookDamageTimestamp;
@@ -50,8 +50,8 @@ public class LivingEntityMixin {
     private void onDamaged(CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if ((Object) this == mc.player) {
-            Hitreg.hurtAge = mc.player.age;
-            Hitreg.wasOnGroundWhenHit = mc.player.isOnGround();
+            Hitreg.jumpReset.hurtAge = mc.player.age;
+            Hitreg.jumpReset.wasOnGroundWhenHit = mc.player.isOnGround();
         }
     }
 }

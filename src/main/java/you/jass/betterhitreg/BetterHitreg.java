@@ -96,12 +96,12 @@ public class BetterHitreg implements ModInitializer {
                 if (client.crosshairTarget instanceof EntityHitResult ehr
                         && ehr.getEntity() instanceof LivingEntity living
                         && living != client.player) {
-                    Hitreg.target = living;
-                    Hitreg.lastTarget = living.getId();
+                    Hitreg.targets.target = living;
+                    Hitreg.targets.lastTarget = living.getId();
                 } else {
                     // press again while not looking at anyone to clear manual target
-                    Hitreg.target = null;
-                    Hitreg.lastTarget = -1;
+                    Hitreg.targets.target = null;
+                    Hitreg.targets.lastTarget = -1;
                 }
             }
 
